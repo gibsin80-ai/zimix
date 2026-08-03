@@ -236,7 +236,7 @@ body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--
             </div>
           </div>
           <div class="ntag" id="ent-preview"></div>
-          <div class="fld" id="ent-bodega-fld" style="display:none;"><label>Bodega destino</label>
+          <div class="fld" id="ent-bodega-fld"><label>Bodega destino</label>
             <select id="ent-bodega">
               <option value="z3">ZIMIX 3</option>
               <option value="z4">ZIMIX 4</option>
@@ -288,7 +288,7 @@ body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--
             </div>
           </div>
           <div class="ntag" id="sal-preview"></div>
-          <div class="fld" id="sal-bodega-fld" style="display:none;"><label>Bodega origen</label>
+          <div class="fld" id="sal-bodega-fld"><label>Bodega origen</label>
             <select id="sal-bodega">
               <option value="z3">ZIMIX 3</option>
               <option value="z4">ZIMIX 4</option>
@@ -611,7 +611,7 @@ function regEntrada(){
   var cant=parseFloat(document.getElementById('ent-cant').value)||0;
   var pres=document.getElementById('ent-pres').value;
   var origen=document.getElementById('ent-origen').value;
-  var bod=ia?document.getElementById('ent-bodega').value:cc;
+  var bod=document.getElementById('ent-bodega').value||cc;
   var notas=document.getElementById('ent-notas').value.trim();
   var placas=document.getElementById('ent-placas').value.trim();
   if(!prod||!cant){shT('Selecciona producto y cantidad','e');return;}
@@ -635,7 +635,7 @@ function regSalida(){
   var prod=document.getElementById('sal-prod').value;
   var cant=parseFloat(document.getElementById('sal-cant').value)||0;
   var pres=document.getElementById('sal-pres').value;
-  var bod=ia?document.getElementById('sal-bodega').value:cc;
+  var bod=document.getElementById('sal-bodega').value||cc;
   var cliente=document.getElementById('sal-cliente').value.trim();
   var notas=document.getElementById('sal-notas').value.trim();
   if(!prod||!cant){shT('Selecciona producto y cantidad','e');return;}
@@ -744,6 +744,11 @@ function setupUser(who){
   document.getElementById('folio-sal').textContent=fmtFolio('sal');
   document.getElementById('folio-trf').textContent=fmtFolio('trf');
   document.getElementById('folio-conv').textContent=fmtFolio('conv');
+  // Preselect bodega for this user
+  var entBod=document.getElementById('ent-bodega');
+  var salBod=document.getElementById('sal-bodega');
+  if(entBod)entBod.value=who;
+  if(salBod)salBod.value=who;
   renderInv();
   loadFromSheets();
   shSc('nvo');shMovForm('ent');
@@ -757,8 +762,7 @@ function chkPwd(){
     document.getElementById('mct').style.display='block';
     document.getElementById('tab-adm').style.display='block';
     document.getElementById('adi').style.display='inline-block';
-    document.getElementById('ent-bodega-fld').style.display='block';
-    document.getElementById('sal-bodega-fld').style.display='block';
+    // bodega fields already visible
     document.getElementById('ttl').textContent='Panel Admin';
     document.getElementById('perr').style.display='none';
     var today=todayStr();
