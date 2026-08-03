@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ZIMIX — Control de Inventario</title>
+<meta name="theme-color" content="#0f3d2e"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="ZIMIX"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css"/>
+<style>
+:root{
+  --verde:#0f3d2e;--verde2:#1a6b4a;--verde3:#2d9b6f;
+  --arena:#f5f0e8;--arena2:#ede5d5;--arena3:#d4c5a9;
+  --tx:#1a1a16;--mu:#5a5a50;--fa:#9a9a8a;
+  --sf:#ffffff;--bd:rgba(0,0,0,.09);--bds:rgba(0,0,0,.16);
+  --sbg:#e8f5ee;--stx:#0f5e35;
+  --wbg:#fdf3e3;--wtx:#7a4f00;
+  --ibg:#e8f0fc;--itx:#1a4fa8;
+  --dbg:#fdeaea;--dtx:#a32020;
+  --r:12px;--rs:8px;--fn:system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--tx);}
+
+/* SPLASH */
+#splash{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;background:linear-gradient(160deg,var(--verde) 0%,var(--verde2) 60%,var(--verde3) 100%);}
+.splash-logo{width:90px;height:90px;background:var(--sf);border-radius:20px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;box-shadow:0 8px 32px rgba(0,0,0,.25);}
+.splash-logo span{font-size:28px;font-weight:800;color:var(--verde);letter-spacing:-1px;}
+.splash-title{font-size:24px;font-weight:700;color:#fff;text-align:center;margin-bottom:6px;}
+.splash-sub{font-size:14px;color:rgba(255,255,255,.65);text-align:center;margin-bottom:3rem;}
+.splash-label{font-size:11px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;text-align:center;}
+.ubtn{width:100%;max-width:300px;margin-bottom:10px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:var(--r);padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;font-family:var(--fn);text-align:left;backdrop-filter:blur(8px);transition:background .15s;}
+.ubtn:hover{background:rgba(255,255,255,.2);}
+.ubtn-ico{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ubtn-ico i{font-size:18px;color:#fff;}
+.ubtn-name{font-size:15px;font-weight:600;color:#fff;}
+.ubtn-sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:1px;}
+.adme{margin-top:1.5rem;font-size:13px;color:rgba(255,255,255,.4);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:var(--fn);}
+
+/* APP */
+#app{display:none;max-width:420px;margin:0 auto;min-height:100vh;display:none;flex-direction:column;}
+.tbar{background:var(--verde);padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10;}
+.bbtn{background:none;border:none;cursor:pointer;padding:4px;color:rgba(255,255,255,.7);font-size:20px;display:flex;}
+.ttl{font-size:15px;font-weight:600;flex:1;color:#fff;}
+.tbadge{font-size:11px;padding:3px 9px;border-radius:999px;font-weight:600;background:rgba(255,255,255,.2);color:#fff;}
+
+.nav{display:flex;background:var(--verde2);border-bottom:2px solid var(--verde3);}
+.nbtn{flex:1;padding:10px 4px;font-size:11px;background:transparent;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,.55);cursor:pointer;font-family:var(--fn);transition:all .15s;margin-bottom:-2px;}
+.nbtn.active{color:#fff;border-bottom-color:#fff;font-weight:600;}
+
+.ct{padding:1rem;flex:1;}
+.sc{display:none;}
+.sc.active{display:block;}
+
+/* CARDS */
+.card{background:var(--sf);border:.5px solid var(--bd);border-radius:var(--r);padding:1rem 1.125rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.ctit{font-size:10px;font-weight:700;color:var(--mu);margin-bottom:14px;text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:8px;}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:999px;font-weight:600;}
+.b-ent{background:var(--sbg);color:var(--stx);}
+.b-sal{background:var(--dbg);color:var(--dtx);}
+.b-trf{background:var(--ibg);color:var(--itx);}
+.b-conv{background:var(--wbg);color:var(--wtx);}
+.b-admin{background:rgba(255,255,255,.2);color:#fff;}
+
+/* FORMS */
+.fld{margin-bottom:12px;}
+.fld:last-child{margin-bottom:0;}
+.fld label{display:block;font-size:13px;color:var(--mu);margin-bottom:5px;font-weight:500;}
+.fld input,.fld select,.fld textarea{width:100%;padding:10px 12px;border:1px solid var(--bds);border-radius:var(--rs);font-size:14px;font-family:var(--fn);background:var(--sf);color:var(--tx);appearance:none;transition:border-color .15s;}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--verde2);}
+.fld select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+.fld textarea{resize:none;height:70px;}
+.fr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;}
+.ntag{font-size:13px;color:var(--stx);background:var(--sbg);padding:8px 10px;border-radius:var(--rs);margin-top:8px;display:none;font-weight:500;}
+.ntag.warn{color:var(--dtx);background:var(--dbg);}
+
+/* BUTTONS */
+.sbmt{width:100%;padding:13px;background:var(--verde);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;font-family:var(--fn);cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;}
+.sbmt:hover{background:var(--verde2);}
+.sbmt:disabled{opacity:.5;cursor:not-allowed;}
+.sbmt.sec{background:var(--sf);color:var(--tx);border:1px solid var(--bds);}
+.sbmt.sec:hover{background:var(--arena);}
+.sbmt.danger{background:#c0392b;}
+
+/* FOLIO DISPLAY */
+.folio-box{background:linear-gradient(135deg,var(--verde) 0%,var(--verde2) 100%);border-radius:var(--r);padding:1.25rem;margin-bottom:1rem;color:#fff;}
+.folio-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.6);margin-bottom:4px;}
+.folio-num{font-size:26px;font-weight:800;letter-spacing:-1px;}
+.folio-sub{font-size:12px;color:rgba(255,255,255,.6);margin-top:4px;}
+
+/* INVENTORY ROWS */
+.inv-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:.5px solid var(--bd);}
+.inv-row:last-child{border-bottom:none;}
+.inv-name{font-size:14px;font-weight:600;}
+.inv-sub{font-size:12px;color:var(--mu);margin-top:2px;}
+.inv-qty{text-align:right;}
+.inv-qty .main{font-size:15px;font-weight:700;}
+.inv-qty .sub{font-size:11px;color:var(--mu);}
+.inv-zero{color:var(--fa);}
+.zero-badge{font-size:10px;padding:2px 6px;border-radius:999px;background:var(--dbg);color:var(--dtx);font-weight:600;margin-left:6px;}
+
+/* MOV CARD */
+.mov{background:var(--sf);border:.5px solid var(--bd);border-radius:var(--r);padding:.9rem 1rem;margin-bottom:8px;}
+.mov-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.mov-folio{font-size:13px;font-weight:700;}
+.mov-sub{font-size:12px;color:var(--mu);margin-top:1px;}
+.mov-detail{font-size:12px;color:var(--mu);margin-top:4px;}
+.mov-qty{font-size:14px;font-weight:700;text-align:right;}
+
+/* LOCK */
+.alck{text-align:center;padding:2.5rem 1rem;}
+.alck i{font-size:36px;color:var(--mu);margin-bottom:14px;display:block;}
+.alck p{font-size:14px;color:var(--mu);margin-bottom:18px;}
+.alck input{width:100%;max-width:220px;padding:12px;border:1px solid var(--bds);border-radius:var(--rs);font-size:18px;text-align:center;letter-spacing:.25em;font-family:var(--fn);margin-bottom:14px;display:block;margin-left:auto;margin-right:auto;}
+.perr{font-size:12px;color:var(--dtx);margin-top:8px;display:none;}
+
+/* TABS inside sections */
+.itabs{display:flex;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:1rem;}
+.itab{flex:1;padding:9px 4px;font-size:12px;background:var(--sf);color:var(--mu);border:none;border-left:.5px solid var(--bd);cursor:pointer;font-family:var(--fn);font-weight:500;}
+.itab:first-child{border-left:none;}
+.itab.active{background:var(--verde);color:#fff;font-weight:700;}
+
+/* ACCORDION */
+.acc-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:11px 0;}
+.acc-body{display:none;padding-bottom:8px;}
+.acc-body.open{display:block;}
+
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-logo"><span>Z</span></div>
+  <div class="splash-title">ZIMIX</div>
+  <div class="splash-sub">Control de inventario de materiales</div>
+  <div class="splash-label">Selecciona tu acceso</div>
+  <button class="ubtn" id="btn-zimix3">
+    <div class="ubtn-ico"><i class="ti ti-building-warehouse"></i></div>
+    <div><div class="ubtn-name">ZIMIX 3</div><div class="ubtn-sub">Registro de entradas y salidas</div></div>
+  </button>
+  <button class="ubtn" id="btn-zimix4">
+    <div class="ubtn-ico"><i class="ti ti-building-warehouse"></i></div>
+    <div><div class="ubtn-name">ZIMIX 4</div><div class="ubtn-sub">Registro de entradas y salidas</div></div>
+  </button>
+  <button class="adme" id="btn-admin"><i class="ti ti-lock" style="font-size:13px;"></i> Administrador</button>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="tbar">
+    <button class="bbtn" id="backbtn"><i class="ti ti-arrow-left"></i></button>
+    <div class="ttl" id="ttl">—</div>
+    <span class="tbadge" id="adi" style="display:none;">Admin</span>
+  </div>
+
+  <!-- ADMIN LOCK -->
+  <div id="alks" style="display:none;">
+    <div class="ct">
+      <div class="alck">
+        <i class="ti ti-shield-lock"></i>
+        <p>Ingresa tu contrasena de administrador</p>
+        <input type="password" id="pwdi" placeholder="......"/>
+        <button class="sbmt" id="btn-login" style="max-width:220px;margin:0 auto;">Entrar</button>
+        <div class="perr" id="perr">Contrasena incorrecta</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav" id="mnav" style="display:none;">
+    <button class="nbtn active" id="tab-nvo">Nuevo</button>
+    <button class="nbtn" id="tab-inv">Inventario</button>
+    <button class="nbtn" id="tab-mov">Movimientos</button>
+    <button class="nbtn" id="tab-adm" style="display:none;">Admin</button>
+  </nav>
+
+  <div class="ct" id="mct" style="display:none;">
+
+    <!-- NUEVO MOVIMIENTO -->
+    <div id="sc-nvo" class="sc active">
+      <div class="itabs">
+        <button class="itab active" id="mt-ent">Entrada</button>
+        <button class="itab" id="mt-sal">Salida</button>
+        <button class="itab" id="mt-trf">Transferencia</button>
+        <button class="itab" id="mt-conv">Conversión</button>
+      </div>
+
+      <!-- ENTRADA -->
+      <div id="form-ent">
+        <div class="folio-box">
+          <div class="folio-label">Remision de entrada</div>
+          <div class="folio-num" id="folio-ent">ENT-001</div>
+          <div class="folio-sub" id="fecha-ent"></div>
+        </div>
+        <div class="card">
+          <div class="ctit">Material recibido</div>
+          <div class="fld"><label>Origen</label>
+            <select id="ent-origen">
+              <option value="veracruz">Planta Veracruz</option>
+              <option value="leon">León, Gto (Caucho)</option>
+            </select>
+          </div>
+          <div class="fld"><label>Producto</label>
+            <select id="ent-prod">
+              <option value="">Seleccionar...</option>
+              <option value="8-16">Arena 8-16</option>
+              <option value="20-40">Arena 20-40 / 16-30 beige</option>
+              <option value="40-60">Arena 40-60</option>
+              <option value="70-80">Arena 70-80 (Planta)</option>
+              <option value="80-90">Arena 80-90</option>
+              <option value="90-100">Arena 90-100 (Fina)</option>
+              <option value="4-8">Arena 4-8</option>
+              <option value="16-30c">Arena 16-30 Café</option>
+              <option value="grava-1/4">Grava 1/4 - 3/8</option>
+              <option value="grava-1/2">Grava 1/2 - 3/4</option>
+              <option value="grava-1">Grava 1/2 - 1</option>
+              <option value="caucho">Caucho</option>
+            </select>
+          </div>
+          <div class="fr">
+            <div class="fld"><label>Cantidad</label><input type="number" id="ent-cant" placeholder="0" oninput="calcEnt()"/></div>
+            <div class="fld"><label>Presentacion</label>
+              <select id="ent-pres" onchange="calcEnt()">
+                <option value="ss1000">Supersaco 1,000 kg</option>
+                <option value="ss1500">Supersaco 1,500 kg</option>
+                <option value="ss2000">Supersaco 2,000 kg</option>
+                <option value="c50">Costal 50 kg</option>
+                <option value="ton">Tonelada</option>
+              </select>
+            </div>
+          </div>
+          <div class="ntag" id="ent-preview"></div>
+          <div class="fld" id="ent-bodega-fld" style="display:none;"><label>Bodega destino</label>
+            <select id="ent-bodega">
+              <option value="z3">ZIMIX 3</option>
+              <option value="z4">ZIMIX 4</option>
+            </select>
+          </div>
+          <div class="fld"><label>No. de unidad / placas</label><input type="text" id="ent-placas" placeholder="Ej. 94BE8U"/></div>
+          <div class="fld"><label>Comentarios</label><textarea id="ent-notas" placeholder="Observaciones, referencia de origen..."></textarea></div>
+        </div>
+        <button class="sbmt" id="btn-ent"><i class="ti ti-arrow-down-circle"></i> Registrar entrada</button>
+      </div>
+
+      <!-- SALIDA -->
+      <div id="form-sal" style="display:none;">
+        <div class="folio-box" style="background:linear-gradient(135deg,#7a1a1a 0%,#c0392b 100%);">
+          <div class="folio-label">Remision de salida</div>
+          <div class="folio-num" id="folio-sal">SAL-11788</div>
+          <div class="folio-sub" id="fecha-sal"></div>
+        </div>
+        <div class="card">
+          <div class="ctit">Material despachado</div>
+          <div class="fld"><label>Producto</label>
+            <select id="sal-prod">
+              <option value="">Seleccionar...</option>
+              <option value="8-16">Arena 8-16</option>
+              <option value="20-40">Arena 20-40 / 16-30 beige</option>
+              <option value="40-60">Arena 40-60</option>
+              <option value="70-80">Arena 70-80 (Planta)</option>
+              <option value="80-90">Arena 80-90</option>
+              <option value="90-100">Arena 90-100 (Fina)</option>
+              <option value="4-8">Arena 4-8</option>
+              <option value="16-30c">Arena 16-30 Café</option>
+              <option value="grava-1/4">Grava 1/4 - 3/8</option>
+              <option value="grava-1/2">Grava 1/2 - 3/4</option>
+              <option value="grava-1">Grava 1/2 - 1</option>
+              <option value="caucho">Caucho</option>
+            </select>
+          </div>
+          <div class="fr">
+            <div class="fld"><label>Cantidad</label><input type="number" id="sal-cant" placeholder="0" oninput="calcSal()"/></div>
+            <div class="fld"><label>Presentacion</label>
+              <select id="sal-pres" onchange="calcSal()">
+                <option value="ss1000">Supersaco 1,000 kg</option>
+                <option value="ss1500">Supersaco 1,500 kg</option>
+                <option value="ss2000">Supersaco 2,000 kg</option>
+                <option value="c50">Costal 50 kg</option>
+                <option value="ton">Tonelada</option>
+                <option value="kg">Kilogramo</option>
+              </select>
+            </div>
+          </div>
+          <div class="ntag" id="sal-preview"></div>
+          <div class="fld" id="sal-bodega-fld" style="display:none;"><label>Bodega origen</label>
+            <select id="sal-bodega">
+              <option value="z3">ZIMIX 3</option>
+              <option value="z4">ZIMIX 4</option>
+            </select>
+          </div>
+          <div class="fld"><label>Cliente</label><input type="text" id="sal-cliente" placeholder="Nombre del cliente"/></div>
+          <div class="fld"><label>Comentarios</label><textarea id="sal-notas" placeholder="No. remision entregada, observaciones..."></textarea></div>
+        </div>
+        <div id="sal-stock-warn" class="ntag warn" style="margin-bottom:12px;"></div>
+        <button class="sbmt danger" id="btn-sal"><i class="ti ti-arrow-up-circle"></i> Registrar salida</button>
+      </div>
+
+      <!-- TRANSFERENCIA -->
+      <div id="form-trf" style="display:none;">
+        <div class="folio-box" style="background:linear-gradient(135deg,#1a3a7a 0%,#2d6bcf 100%);">
+          <div class="folio-label">Transferencia entre bodegas</div>
+          <div class="folio-num" id="folio-trf">TRF-001</div>
+          <div class="folio-sub" id="fecha-trf"></div>
+        </div>
+        <div class="card">
+          <div class="ctit">Datos de transferencia</div>
+          <div class="fr">
+            <div class="fld"><label>De</label>
+              <select id="trf-de"><option value="z3">ZIMIX 3</option><option value="z4">ZIMIX 4</option></select>
+            </div>
+            <div class="fld"><label>A</label>
+              <select id="trf-a"><option value="z4">ZIMIX 4</option><option value="z3">ZIMIX 3</option></select>
+            </div>
+          </div>
+          <div class="fld"><label>Producto</label>
+            <select id="trf-prod">
+              <option value="">Seleccionar...</option>
+              <option value="8-16">Arena 8-16</option>
+              <option value="20-40">Arena 20-40 / 16-30 beige</option>
+              <option value="40-60">Arena 40-60</option>
+              <option value="70-80">Arena 70-80 (Planta)</option>
+              <option value="80-90">Arena 80-90</option>
+              <option value="90-100">Arena 90-100 (Fina)</option>
+              <option value="4-8">Arena 4-8</option>
+              <option value="16-30c">Arena 16-30 Café</option>
+              <option value="grava-1/4">Grava 1/4 - 3/8</option>
+              <option value="grava-1/2">Grava 1/2 - 3/4</option>
+              <option value="grava-1">Grava 1/2 - 1</option>
+              <option value="caucho">Caucho</option>
+            </select>
+          </div>
+          <div class="fr">
+            <div class="fld"><label>Cantidad</label><input type="number" id="trf-cant" placeholder="0" oninput="calcTrf()"/></div>
+            <div class="fld"><label>Presentacion</label>
+              <select id="trf-pres" onchange="calcTrf()">
+                <option value="ss1000">Supersaco 1,000 kg</option>
+                <option value="ss1500">Supersaco 1,500 kg</option>
+                <option value="ss2000">Supersaco 2,000 kg</option>
+                <option value="c50">Costal 50 kg</option>
+                <option value="ton">Tonelada</option>
+              </select>
+            </div>
+          </div>
+          <div class="ntag" id="trf-preview"></div>
+          <div class="fld"><label>Comentarios</label><textarea id="trf-notas" placeholder="Motivo de transferencia..."></textarea></div>
+        </div>
+        <button class="sbmt" id="btn-trf" style="background:var(--itx);"><i class="ti ti-arrows-exchange"></i> Registrar transferencia</button>
+      </div>
+
+      <!-- CONVERSION -->
+      <div id="form-conv" style="display:none;">
+        <div class="folio-box" style="background:linear-gradient(135deg,#5a3a00 0%,#9a6800 100%);">
+          <div class="folio-label">Conversion de presentacion</div>
+          <div class="folio-num" id="folio-conv">CONV-001</div>
+          <div class="folio-sub" id="fecha-conv"></div>
+        </div>
+        <div class="card">
+          <div class="ctit">De → A</div>
+          <div class="fld"><label>Bodega</label>
+            <select id="conv-bod"><option value="z3">ZIMIX 3</option><option value="z4">ZIMIX 4</option></select>
+          </div>
+          <div class="fld"><label>Producto</label>
+            <select id="conv-prod">
+              <option value="">Seleccionar...</option>
+              <option value="8-16">Arena 8-16</option>
+              <option value="20-40">Arena 20-40 / 16-30 beige</option>
+              <option value="40-60">Arena 40-60</option>
+              <option value="70-80">Arena 70-80 (Planta)</option>
+              <option value="80-90">Arena 80-90</option>
+              <option value="90-100">Arena 90-100 (Fina)</option>
+              <option value="4-8">Arena 4-8</option>
+              <option value="16-30c">Arena 16-30 Café</option>
+              <option value="caucho">Caucho</option>
+            </select>
+          </div>
+          <div style="background:var(--arena);border-radius:var(--rs);padding:12px;margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Entrada (lo que se abre)</div>
+            <div class="fr">
+              <div class="fld"><label>Cantidad</label><input type="number" id="conv-de-cant" placeholder="0" oninput="calcConv()"/></div>
+              <div class="fld"><label>De</label>
+                <select id="conv-de-pres" onchange="calcConv()">
+                  <option value="ss1000">Supersaco 1,000 kg</option>
+                  <option value="ss1500">Supersaco 1,500 kg</option>
+                  <option value="ss2000">Supersaco 2,000 kg</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div style="background:var(--sbg);border-radius:var(--rs);padding:12px;margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:700;color:var(--stx);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Salida (lo que se produce)</div>
+            <div class="fr">
+              <div class="fld"><label>Costales 50 kg</label><input type="number" id="conv-a-cant" placeholder="Auto" readonly style="background:var(--arena);"/></div>
+              <div class="fld"><label>Kg totales</label><input type="number" id="conv-kg" placeholder="0" readonly style="background:var(--arena);"/></div>
+            </div>
+          </div>
+          <div class="fld"><label>Comentarios</label><textarea id="conv-notas" placeholder="Observaciones..."></textarea></div>
+        </div>
+        <button class="sbmt" id="btn-conv" style="background:var(--wtx);"><i class="ti ti-refresh"></i> Registrar conversion</button>
+      </div>
+    </div>
+
+    <!-- INVENTARIO -->
+    <div id="sc-inv" class="sc">
+      <div class="itabs">
+        <button class="itab active" id="it-z3">ZIMIX 3</button>
+        <button class="itab" id="it-z4">ZIMIX 4</button>
+        <button class="itab" id="it-tot">Total</button>
+      </div>
+      <div id="inv-z3"></div>
+      <div id="inv-z4" style="display:none;"></div>
+      <div id="inv-tot" style="display:none;"></div>
+    </div>
+
+    <!-- MOVIMIENTOS -->
+    <div id="sc-mov" class="sc">
+      <div class="itabs">
+        <button class="itab active" id="fm-all">Todos</button>
+        <button class="itab" id="fm-ent">Entradas</button>
+        <button class="itab" id="fm-sal">Salidas</button>
+        <button class="itab" id="fm-trf">Transf.</button>
+      </div>
+      <div id="mov-list"></div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="sc-adm" class="sc">
+      <div class="card">
+        <div class="ctit">Resumen general</div>
+        <div id="adm-resumen"></div>
+      </div>
+      <div class="card">
+        <div class="ctit">Links de acceso</div>
+        <div id="linkbox"></div>
+      </div>
+      <button class="sbmt sec" id="btn-reset-inv" style="margin-top:8px;"><i class="ti ti-settings"></i> Ajustar inventario inicial</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var AP = '1234';
+var PRODS = {
+  '8-16':'Arena 8-16','20-40':'Arena 20-40/16-30 beige','40-60':'Arena 40-60',
+  '70-80':'Arena 70-80 (Planta)','80-90':'Arena 80-90','90-100':'Arena 90-100 (Fina)',
+  '4-8':'Arena 4-8','16-30c':'Arena 16-30 Cafe',
+  'grava-1/4':'Grava 1/4-3/8','grava-1/2':'Grava 1/2-3/4','grava-1':'Grava 1/2-1',
+  'caucho':'Caucho'
+};
+var KG_PRES = {ss1000:1000,ss1500:1500,ss2000:2000,c50:50,ton:1000,kg:1};
+var LBL_PRES = {ss1000:'Supersaco 1,000 kg',ss1500:'Supersaco 1,500 kg',ss2000:'Supersaco 2,000 kg',c50:'Costal 50 kg',ton:'Tonelada',kg:'Kilogramo'};
+
+// State
+var cc=null, ia=false, fromUrl=false;
+var MOVS=[];
+var COUNTERS={ent:1,sal:11788,trf:1,conv:1};
+var INV={z3:{},z4:{}};
+Object.keys(PRODS).forEach(function(p){INV.z3[p]={ss:0,c50:0,kg_total:0};INV.z4[p]={ss:0,c50:0,kg_total:0};});
+
+function fmtFolio(type){
+  var n=COUNTERS[type];
+  if(type==='sal') return 'SAL-'+n;
+  if(type==='ent') return 'ENT-'+String(n).padStart(3,'0');
+  if(type==='trf') return 'TRF-'+String(n).padStart(3,'0');
+  return 'CONV-'+String(n).padStart(3,'0');
+}
+
+function todayStr(){
+  return new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+function kgFromPres(cant,pres){return cant*(KG_PRES[pres]||1);}
+
+function calcPreview(cantId,presId,previewId){
+  var cant=parseFloat(document.getElementById(cantId).value)||0;
+  var pres=document.getElementById(presId).value;
+  var kg=kgFromPres(cant,pres);
+  var el=document.getElementById(previewId);
+  if(kg>0){el.textContent=kg.toLocaleString()+' kg = '+(kg/1000).toFixed(2)+' ton';el.style.display='block';}
+  else el.style.display='none';
+}
+function calcEnt(){calcPreview('ent-cant','ent-pres','ent-preview');}
+function calcSal(){
+  calcPreview('sal-cant','sal-pres','sal-preview');
+  checkStock();
+}
+function calcTrf(){calcPreview('trf-cant','trf-pres','trf-preview');}
+function calcConv(){
+  var cant=parseFloat(document.getElementById('conv-de-cant').value)||0;
+  var pres=document.getElementById('conv-de-pres').value;
+  var kg=kgFromPres(cant,pres);
+  var costales=Math.floor(kg/50);
+  document.getElementById('conv-a-cant').value=costales>0?costales:'';
+  document.getElementById('conv-kg').value=kg>0?kg:'';
+}
+
+function checkStock(){
+  var prod=document.getElementById('sal-prod').value;
+  var cant=parseFloat(document.getElementById('sal-cant').value)||0;
+  var pres=document.getElementById('sal-pres').value;
+  var bod=cc==='admin'?document.getElementById('sal-bodega').value:cc;
+  var kg=kgFromPres(cant,pres);
+  var warn=document.getElementById('sal-stock-warn');
+  if(!prod||!kg){warn.style.display='none';return;}
+  var disponible=INV[bod]&&INV[bod][prod]?INV[bod][prod].kg_total:0;
+  var bodName=bod==='z3'?'ZIMIX 3':'ZIMIX 4';
+  if(kg>disponible){
+    warn.textContent='Saldo insuficiente en '+bodName+': '+disponible.toLocaleString()+' kg disponibles';
+    warn.style.display='block';
+  } else warn.style.display='none';
+}
+
+function shMovType(type){
+  ['all','ent','sal','trf'].forEach(function(t){
+    document.getElementById('fm-'+t).classList.toggle('active',t===type);
+  });
+  var filtered=type==='all'?MOVS:MOVS.filter(function(m){return m.tipo===type;});
+  renderMovs(filtered);
+}
+
+function renderMovs(list){
+  var el=document.getElementById('mov-list');
+  if(!list||!list.length){el.innerHTML='<p style="color:var(--fa);font-size:13px;text-align:center;padding:2rem 0;">Sin movimientos aun.</p>';return;}
+  var badges={ent:'b-ent',sal:'b-sal',trf:'b-trf',conv:'b-conv'};
+  var labels={ent:'Entrada',sal:'Salida',trf:'Transferencia',conv:'Conversion'};
+  el.innerHTML=list.slice(0,30).map(function(m){
+    var kgStr=m.kg?m.kg.toLocaleString()+' kg':'—';
+    var detail='';
+    if(m.tipo==='trf') detail='De '+m.de+' → '+m.a;
+    else if(m.tipo==='ent') detail='De '+m.origen+' → '+m.bodega;
+    else if(m.tipo==='sal') detail='Cliente: '+m.cliente;
+    else if(m.tipo==='conv') detail='Conversion en '+m.bodega;
+    return '<div class="mov">'+
+      '<div class="mov-top"><div>'+
+      '<div class="mov-folio"><span class="badge '+badges[m.tipo]+'">'+labels[m.tipo]+'</span> &nbsp;'+m.folio+'</div>'+
+      '<div class="mov-sub">'+PRODS[m.prod]||m.prod+' &nbsp;·&nbsp; '+m.fecha+'</div>'+
+      '</div><div class="mov-qty">'+(m.tipo==='sal'?'<span style="color:var(--dtx);">-</span>':'<span style="color:var(--stx);">+</span>')+kgStr+'</div></div>'+
+      '<div class="mov-detail">'+detail+(m.notas?' &nbsp;·&nbsp; '+m.notas:'')+'</div>'+
+      '</div>';
+  }).join('');
+}
+
+function renderInv(){
+  function buildTable(bodKey){
+    var bodName=bodKey==='z3'?'ZIMIX 3':'ZIMIX 4';
+    var html='',total=0;
+    Object.keys(PRODS).forEach(function(p){
+      var d=INV[bodKey][p]||{ss:0,c50:0,kg_total:0};
+      var kg=d.kg_total||0; total+=kg;
+      var zero=kg<=0;
+      html+='<div class="inv-row">'+
+        '<div><div class="inv-name'+(zero?' inv-zero':'')+'">'+PRODS[p]+(zero?'<span class="zero-badge">Sin stock</span>':'')+'</div>'+
+        '<div class="inv-sub">'+
+        (d.ss>0?Math.round(d.ss)+' supersacos &nbsp;':'')+(d.c50>0?Math.round(d.c50)+' costales':'')+'</div></div>'+
+        '<div class="inv-qty"><div class="main'+(zero?' inv-zero':'')+'">'+kg.toLocaleString()+' kg</div>'+
+        '<div class="sub">'+(kg/1000).toFixed(2)+' ton</div></div></div>';
+    });
+    html+='<div class="inv-row" style="border-top:1.5px solid var(--verde3);margin-top:4px;">'+
+      '<div><div class="inv-name" style="color:var(--verde);">Total '+bodName+'</div></div>'+
+      '<div class="inv-qty"><div class="main" style="color:var(--verde);">'+total.toLocaleString()+' kg</div>'+
+      '<div class="sub">'+(total/1000).toFixed(2)+' ton</div></div></div>';
+    return '<div class="card">'+html+'</div>';
+  }
+  function buildTotal(){
+    var html='',total=0;
+    Object.keys(PRODS).forEach(function(p){
+      var d3=INV.z3[p]||{ss:0,c50:0,kg_total:0};
+      var d4=INV.z4[p]||{ss:0,c50:0,kg_total:0};
+      var kg=(d3.kg_total||0)+(d4.kg_total||0); total+=kg;
+      var zero=kg<=0;
+      html+='<div class="inv-row">'+
+        '<div><div class="inv-name'+(zero?' inv-zero':'')+'">'+PRODS[p]+(zero?'<span class="zero-badge">Sin stock</span>':'')+'</div>'+
+        '<div class="inv-sub">ZIMIX 3: '+(d3.kg_total/1000).toFixed(1)+'t &nbsp; ZIMIX 4: '+(d4.kg_total/1000).toFixed(1)+'t</div></div>'+
+        '<div class="inv-qty"><div class="main'+(zero?' inv-zero':'')+'">'+kg.toLocaleString()+' kg</div>'+
+        '<div class="sub">'+(kg/1000).toFixed(2)+' ton</div></div></div>';
+    });
+    html+='<div class="inv-row" style="border-top:1.5px solid var(--verde3);margin-top:4px;">'+
+      '<div><div class="inv-name" style="color:var(--verde);">Total general</div></div>'+
+      '<div class="inv-qty"><div class="main" style="color:var(--verde);">'+total.toLocaleString()+' kg</div>'+
+      '<div class="sub">'+(total/1000).toFixed(2)+' ton</div></div></div>';
+    return '<div class="card">'+html+'</div>';
+  }
+  document.getElementById('inv-z3').innerHTML=buildTable('z3');
+  document.getElementById('inv-z4').innerHTML=buildTable('z4');
+  document.getElementById('inv-tot').innerHTML=buildTotal();
+}
+
+function shInvTab(tab){
+  ['z3','z4','tot'].forEach(function(t){
+    document.getElementById('inv-'+t).style.display=t===tab?'block':'none';
+    document.getElementById('it-'+t).classList.toggle('active',t===tab);
+  });
+}
+
+function shMovForm(type){
+  ['ent','sal','trf','conv'].forEach(function(t){
+    document.getElementById('form-'+t).style.display=t===type?'block':'none';
+    document.getElementById('mt-'+t).classList.toggle('active',t===type);
+  });
+}
+
+function regEntrada(){
+  var prod=document.getElementById('ent-prod').value;
+  var cant=parseFloat(document.getElementById('ent-cant').value)||0;
+  var pres=document.getElementById('ent-pres').value;
+  var origen=document.getElementById('ent-origen').value;
+  var bod=ia?document.getElementById('ent-bodega').value:cc;
+  var notas=document.getElementById('ent-notas').value.trim();
+  var placas=document.getElementById('ent-placas').value.trim();
+  if(!prod||!cant){shT('Selecciona producto y cantidad','e');return;}
+  var kg=kgFromPres(cant,pres);
+  var folio=fmtFolio('ent');
+  if(!INV[bod][prod]) INV[bod][prod]={ss:0,c50:0,kg_total:0};
+  if(pres.startsWith('ss')){INV[bod][prod].ss+=cant;} else if(pres==='c50'){INV[bod][prod].c50+=cant;}
+  INV[bod][prod].kg_total+=kg;
+  MOVS.unshift({tipo:'ent',folio:folio,prod:prod,cant:cant,pres:pres,kg:kg,origen:origen==='veracruz'?'Planta Veracruz':'Leon Gto',bodega:bod==='z3'?'ZIMIX 3':'ZIMIX 4',placas:placas,notas:notas,fecha:todayStr()});
+  COUNTERS.ent++;
+  document.getElementById('ent-cant').value='';document.getElementById('ent-notas').value='';document.getElementById('ent-placas').value='';document.getElementById('ent-preview').style.display='none';
+  document.getElementById('folio-ent').textContent=fmtFolio('ent');
+  renderInv();shT('Entrada '+folio+' registrada — '+kg.toLocaleString()+' kg de '+PRODS[prod],'o');
+  shSc('inv');document.getElementById('tab-inv').classList.add('active');
+  document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-inv').classList.add('active');
+}
+
+function regSalida(){
+  var prod=document.getElementById('sal-prod').value;
+  var cant=parseFloat(document.getElementById('sal-cant').value)||0;
+  var pres=document.getElementById('sal-pres').value;
+  var bod=ia?document.getElementById('sal-bodega').value:cc;
+  var cliente=document.getElementById('sal-cliente').value.trim();
+  var notas=document.getElementById('sal-notas').value.trim();
+  if(!prod||!cant){shT('Selecciona producto y cantidad','e');return;}
+  var kg=kgFromPres(cant,pres);
+  var disponible=INV[bod][prod]?INV[bod][prod].kg_total:0;
+  if(kg>disponible){shT('Saldo insuficiente','e');return;}
+  var folio=fmtFolio('sal');
+  if(!INV[bod][prod]) INV[bod][prod]={ss:0,c50:0,kg_total:0};
+  if(pres.startsWith('ss')){INV[bod][prod].ss=Math.max(0,INV[bod][prod].ss-cant);}
+  else if(pres==='c50'){INV[bod][prod].c50=Math.max(0,INV[bod][prod].c50-cant);}
+  INV[bod][prod].kg_total=Math.max(0,INV[bod][prod].kg_total-kg);
+  MOVS.unshift({tipo:'sal',folio:folio,prod:prod,cant:cant,pres:pres,kg:kg,cliente:cliente,bodega:bod==='z3'?'ZIMIX 3':'ZIMIX 4',notas:notas,fecha:todayStr()});
+  COUNTERS.sal++;
+  document.getElementById('sal-cant').value='';document.getElementById('sal-notas').value='';document.getElementById('sal-cliente').value='';document.getElementById('sal-preview').style.display='none';document.getElementById('sal-stock-warn').style.display='none';
+  document.getElementById('folio-sal').textContent=fmtFolio('sal');
+  renderInv();shT('Salida '+folio+' registrada — '+kg.toLocaleString()+' kg de '+PRODS[prod],'o');
+  shSc('inv');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-inv').classList.add('active');
+}
+
+function regTransferencia(){
+  var prod=document.getElementById('trf-prod').value;
+  var cant=parseFloat(document.getElementById('trf-cant').value)||0;
+  var pres=document.getElementById('trf-pres').value;
+  var de=document.getElementById('trf-de').value;
+  var a=document.getElementById('trf-a').value;
+  var notas=document.getElementById('trf-notas').value.trim();
+  if(!prod||!cant||de===a){shT('Verifica los datos de transferencia','e');return;}
+  var kg=kgFromPres(cant,pres);
+  var disponible=INV[de][prod]?INV[de][prod].kg_total:0;
+  if(kg>disponible){shT('Saldo insuficiente en '+(de==='z3'?'ZIMIX 3':'ZIMIX 4'),'e');return;}
+  var folio=fmtFolio('trf');
+  if(!INV[de][prod]) INV[de][prod]={ss:0,c50:0,kg_total:0};
+  if(!INV[a][prod]) INV[a][prod]={ss:0,c50:0,kg_total:0};
+  if(pres.startsWith('ss')){INV[de][prod].ss=Math.max(0,INV[de][prod].ss-cant);INV[a][prod].ss+=cant;}
+  else if(pres==='c50'){INV[de][prod].c50=Math.max(0,INV[de][prod].c50-cant);INV[a][prod].c50+=cant;}
+  INV[de][prod].kg_total=Math.max(0,INV[de][prod].kg_total-kg);
+  INV[a][prod].kg_total+=kg;
+  MOVS.unshift({tipo:'trf',folio:folio,prod:prod,cant:cant,pres:pres,kg:kg,de:de==='z3'?'ZIMIX 3':'ZIMIX 4',a:a==='z3'?'ZIMIX 3':'ZIMIX 4',notas:notas,fecha:todayStr()});
+  COUNTERS.trf++;
+  document.getElementById('trf-cant').value='';document.getElementById('trf-notas').value='';document.getElementById('trf-preview').style.display='none';
+  document.getElementById('folio-trf').textContent=fmtFolio('trf');
+  renderInv();shT('Transferencia '+folio+' registrada','o');
+  shSc('inv');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-inv').classList.add('active');
+}
+
+function regConversion(){
+  var prod=document.getElementById('conv-prod').value;
+  var deCant=parseFloat(document.getElementById('conv-de-cant').value)||0;
+  var dePres=document.getElementById('conv-de-pres').value;
+  var bod=document.getElementById('conv-bod').value;
+  var notas=document.getElementById('conv-notas').value.trim();
+  if(!prod||!deCant){shT('Selecciona producto y cantidad','e');return;}
+  var kg=kgFromPres(deCant,dePres);
+  var costales=Math.floor(kg/50);
+  var disponible=INV[bod][prod]?INV[bod][prod].kg_total:0;
+  if(kg>disponible){shT('Saldo insuficiente para conversion','e');return;}
+  var folio=fmtFolio('conv');
+  if(!INV[bod][prod]) INV[bod][prod]={ss:0,c50:0,kg_total:0};
+  INV[bod][prod].ss=Math.max(0,INV[bod][prod].ss-deCant);
+  INV[bod][prod].c50+=costales;
+  MOVS.unshift({tipo:'conv',folio:folio,prod:prod,cant:deCant,pres:dePres,kg:kg,costales:costales,bodega:bod==='z3'?'ZIMIX 3':'ZIMIX 4',notas:notas,fecha:todayStr()});
+  COUNTERS.conv++;
+  document.getElementById('conv-de-cant').value='';document.getElementById('conv-a-cant').value='';document.getElementById('conv-kg').value='';document.getElementById('conv-notas').value='';
+  document.getElementById('folio-conv').textContent=fmtFolio('conv');
+  renderInv();shT('Conversion '+folio+': '+deCant+' supersacos → '+costales+' costales','o');
+  shSc('inv');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-inv').classList.add('active');
+}
+
+function enterApp(who){
+  cc=who;
+  document.getElementById('splash').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('backbtn').style.display=fromUrl?'none':'flex';
+  if(who==='admin'){
+    document.getElementById('ttl').textContent='Administrador';
+    document.getElementById('alks').style.display='block';
+    document.getElementById('mnav').style.display='none';
+    document.getElementById('mct').style.display='none';
+  } else {
+    setupUser(who);
+  }
+}
+
+function setupUser(who){
+  var name=who==='z3'?'ZIMIX 3':'ZIMIX 4';
+  document.getElementById('ttl').textContent=name;
+  document.getElementById('alks').style.display='none';
+  document.getElementById('mnav').style.display='flex';
+  document.getElementById('mct').style.display='block';
+  document.getElementById('tab-adm').style.display='none';
+  document.getElementById('adi').style.display='none';
+  document.getElementById('ent-bodega-fld').style.display='none';
+  document.getElementById('sal-bodega-fld').style.display='none';
+  var today=todayStr();
+  document.getElementById('fecha-ent').textContent=today;
+  document.getElementById('fecha-sal').textContent=today;
+  document.getElementById('fecha-trf').textContent=today;
+  document.getElementById('fecha-conv').textContent=today;
+  document.getElementById('folio-ent').textContent=fmtFolio('ent');
+  document.getElementById('folio-sal').textContent=fmtFolio('sal');
+  document.getElementById('folio-trf').textContent=fmtFolio('trf');
+  document.getElementById('folio-conv').textContent=fmtFolio('conv');
+  renderInv();
+  shSc('nvo');shMovForm('ent');
+}
+
+function chkPwd(){
+  if(document.getElementById('pwdi').value===AP){
+    ia=true;cc='admin';
+    document.getElementById('alks').style.display='none';
+    document.getElementById('mnav').style.display='flex';
+    document.getElementById('mct').style.display='block';
+    document.getElementById('tab-adm').style.display='block';
+    document.getElementById('adi').style.display='inline-block';
+    document.getElementById('ent-bodega-fld').style.display='block';
+    document.getElementById('sal-bodega-fld').style.display='block';
+    document.getElementById('ttl').textContent='Panel Admin';
+    document.getElementById('perr').style.display='none';
+    var today=todayStr();
+    document.getElementById('fecha-ent').textContent=today;document.getElementById('fecha-sal').textContent=today;
+    document.getElementById('fecha-trf').textContent=today;document.getElementById('fecha-conv').textContent=today;
+    document.getElementById('folio-ent').textContent=fmtFolio('ent');
+    document.getElementById('folio-sal').textContent=fmtFolio('sal');
+    document.getElementById('folio-trf').textContent=fmtFolio('trf');
+    document.getElementById('folio-conv').textContent=fmtFolio('conv');
+    bldLinks();renderInv();
+    shSc('inv');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-inv').classList.add('active');
+  } else document.getElementById('perr').style.display='block';
+}
+
+function shSc(id){
+  document.querySelectorAll('.sc').forEach(function(s){s.classList.remove('active');});
+  var el=document.getElementById('sc-'+id);
+  if(el)el.classList.add('active');
+  if(id==='inv'){renderInv();shInvTab('z3');document.getElementById('it-z3').classList.add('active');}
+  if(id==='mov'){renderMovs(MOVS);shMovType('all');}
+}
+
+function bldLinks(){
+  var base=window.location.href.split('?')[0];
+  var links=[{name:'ZIMIX 3',key:'z3'},{name:'ZIMIX 4',key:'z4'},{name:'Administrador',key:'admin'}];
+  document.getElementById('linkbox').innerHTML=links.map(function(l){
+    var url=base+'?u='+l.key;
+    return '<div style="padding:8px 0;border-bottom:.5px solid var(--bd);">'+
+      '<div style="font-size:13px;font-weight:600;">'+l.name+'</div>'+
+      '<div style="font-size:11px;color:var(--mu);word-break:break-all;margin-top:2px;">'+url+'</div>'+
+      '<button style="margin-top:6px;padding:4px 10px;background:var(--arena);border:.5px solid var(--bds);border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--fn);" data-url="'+url+'" onclick="navigator.clipboard.writeText(this.dataset.url).then(function(){shT(\'Copiado\',\'o\');})"><i class="ti ti-copy" style="font-size:12px;"></i> Copiar</button>'+
+      '</div>';
+  }).join('');
+}
+
+function shT(msg,type){
+  var t=document.getElementById('tst');
+  if(!t){t=document.createElement('div');t.id='tst';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:999;transition:opacity .3s;max-width:320px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.15);';document.body.appendChild(t);}
+  t.textContent=msg;t.style.background=type==='o'?'var(--stx)':'#c0392b';t.style.color='#fff';t.style.opacity='1';
+  setTimeout(function(){t.style.opacity='0';},3500);
+}
+
+function goBack(){
+  if(fromUrl)return;
+  ia=false;cc=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('splash').style.display='flex';
+  document.getElementById('pwdi').value='';
+  document.getElementById('perr').style.display='none';
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('btn-zimix3').addEventListener('click',function(){enterApp('z3');});
+  document.getElementById('btn-zimix4').addEventListener('click',function(){enterApp('z4');});
+  document.getElementById('btn-admin').addEventListener('click',function(){enterApp('admin');});
+  document.getElementById('backbtn').addEventListener('click',goBack);
+  document.getElementById('btn-login').addEventListener('click',chkPwd);
+  document.getElementById('pwdi').addEventListener('keydown',function(e){if(e.key==='Enter')chkPwd();});
+
+  // Nav tabs
+  document.getElementById('tab-nvo').addEventListener('click',function(){shSc('nvo');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+  document.getElementById('tab-inv').addEventListener('click',function(){shSc('inv');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+  document.getElementById('tab-mov').addEventListener('click',function(){shSc('mov');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+  document.getElementById('tab-adm').addEventListener('click',function(){shSc('adm');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+
+  // Mov form tabs
+  document.getElementById('mt-ent').addEventListener('click',function(){shMovForm('ent');});
+  document.getElementById('mt-sal').addEventListener('click',function(){shMovForm('sal');});
+  document.getElementById('mt-trf').addEventListener('click',function(){shMovForm('trf');});
+  document.getElementById('mt-conv').addEventListener('click',function(){shMovForm('conv');});
+
+  // Inv tabs
+  document.getElementById('it-z3').addEventListener('click',function(){shInvTab('z3');document.querySelectorAll('.itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+  document.getElementById('it-z4').addEventListener('click',function(){shInvTab('z4');document.querySelectorAll('.itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+  document.getElementById('it-tot').addEventListener('click',function(){shInvTab('tot');document.querySelectorAll('.itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+
+  // Mov filter tabs
+  document.getElementById('fm-all').addEventListener('click',function(){shMovType('all');document.querySelectorAll('#sc-mov .itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+  document.getElementById('fm-ent').addEventListener('click',function(){shMovType('ent');document.querySelectorAll('#sc-mov .itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+  document.getElementById('fm-sal').addEventListener('click',function(){shMovType('sal');document.querySelectorAll('#sc-mov .itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+  document.getElementById('fm-trf').addEventListener('click',function(){shMovType('trf');document.querySelectorAll('#sc-mov .itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+
+  // Action buttons
+  document.getElementById('btn-ent').addEventListener('click',regEntrada);
+  document.getElementById('btn-sal').addEventListener('click',regSalida);
+  document.getElementById('btn-trf').addEventListener('click',regTransferencia);
+  document.getElementById('btn-conv').addEventListener('click',regConversion);
+
+  // URL param
+  var p=new URLSearchParams(window.location.search);
+  var u=p.get('u');
+  if(u){fromUrl=true;document.getElementById('splash').style.display='none';enterApp(u);}
+});
+</script>
+</body>
+</html>
