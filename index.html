@@ -417,8 +417,9 @@ body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--
       </div>
       <div id="inv-z3"></div>
       <div id="inv-z4" style="display:none;"></div>
-      <div id="inv-tot" style="display:none;">
-        <button class="sbmt" id="btn-pdf" style="margin-bottom:1rem;background:var(--verde2);"><i class="ti ti-file-type-pdf"></i> Generar reporte PDF</button>
+      <div id="inv-tot" style="display:none;"></div>
+      <div id="pdf-btn-wrap" style="display:none;margin-top:4px;">
+        <button class="sbmt" id="btn-pdf" style="background:var(--verde2);"><i class="ti ti-file-type-pdf"></i> Generar reporte PDF</button>
       </div>
     </div>
 
@@ -603,6 +604,8 @@ function shInvTab(tab){
     document.getElementById('inv-'+t).style.display=t===tab?'block':'none';
     document.getElementById('it-'+t).classList.toggle('active',t===tab);
   });
+  var pdfWrap=document.getElementById('pdf-btn-wrap');
+  if(pdfWrap)pdfWrap.style.display=tab==='tot'?'block':'none';
 }
 
 function shMovForm(type){
