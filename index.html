@@ -417,7 +417,9 @@ body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--
       </div>
       <div id="inv-z3"></div>
       <div id="inv-z4" style="display:none;"></div>
-      <div id="inv-tot" style="display:none;"></div>
+      <div id="inv-tot" style="display:none;">
+        <button class="sbmt" id="btn-pdf" style="margin-bottom:1rem;background:var(--verde2);"><i class="ti ti-file-type-pdf"></i> Generar reporte PDF</button>
+      </div>
     </div>
 
     <!-- MOVIMIENTOS -->
@@ -884,6 +886,77 @@ async function loadFromSheets(){
   }catch(e){console.error('Error loading from Sheets:',e);}
 }
 
+function generarPDF(){
+  var fecha = new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
+  var hora = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  
+  function buildRows(bodKey){
+    var rows='';
+    var total=0;
+    Object.keys(PRODS).forEach(function(p){
+      var d=INV[bodKey][p]||{ss:0,c50:0,kg_total:0};
+      var kg=d.kg_total||0;
+      total+=kg;
+      var ssStr=d.ss>0?Math.round(d.ss)+' ss':'—';
+      var c50Str=d.c50>0?Math.round(d.c50)+' cost.':'—';
+      var status=kg<=0?'Sin stock':'';
+      rows+='<tr style="'+(kg<=0?'color:#999;':'')+'">'+
+        '<td style="padding:6px 10px;border-bottom:1px solid #eee;">'+PRODS[p]+'</td>'+
+        '<td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center;">'+ssStr+'</td>'+
+        '<td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center;">'+c50Str+'</td>'+
+        '<td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;font-weight:600;">'+kg.toLocaleString()+' kg</td>'+
+        '<td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;">'+(kg/1000).toFixed(2)+' ton</td>'+
+        '<td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center;color:#c0392b;font-size:11px;">'+status+'</td>'+
+        '</tr>';
+    });
+    rows+='<tr style="background:#0a3424;color:white;font-weight:700;">'+
+      '<td style="padding:8px 10px;">TOTAL</td>'+
+      '<td colspan="3" style="padding:8px 10px;text-align:right;">'+total.toLocaleString()+' kg</td>'+
+      '<td style="padding:8px 10px;text-align:right;">'+(total/1000).toFixed(2)+' ton</td>'+
+      '<td></td></tr>';
+    return rows;
+  }
+
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"/>'+
+    '<title>Reporte ZIMIX '+fecha+'</title>'+
+    '<style>body{font-family:system-ui,sans-serif;margin:0;padding:20px;color:#1a1a16;}'+
+    'h1{color:#0a3424;font-size:22px;margin:0;}'+
+    'h2{color:#0f5a3a;font-size:15px;margin:20px 0 8px;}'+
+    'table{width:100%;border-collapse:collapse;font-size:13px;}'+
+    'th{background:#0a3424;color:white;padding:8px 10px;text-align:left;}'+
+    'th:not(:first-child){text-align:center;}'+
+    'th:last-child{text-align:center;}'+
+    '@media print{button{display:none;}}'+
+    '</style></head><body>'+
+    '<div style="display:flex;align-items:center;gap:16px;margin-bottom:4px;">'+
+    '<div style="background:#0a3424;color:white;font-weight:800;font-size:22px;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;">Z</div>'+
+    '<div><h1>Reporte de Inventario</h1><p style="margin:2px 0;color:#666;font-size:13px;">ZIMIX — Arenas Silicas</p></div></div>'+
+    '<p style="color:#666;font-size:12px;margin-bottom:20px;">Generado: '+fecha+' a las '+hora+'</p>'+
+    '<hr style="border:none;border-top:2px solid #0a3424;margin-bottom:20px;"/>'+
+    '<h2>ZIMIX 3</h2>'+
+    '<table><thead><tr>'+
+    '<th>Producto</th><th>Supersacos</th><th>Costales 50kg</th><th>Total kg</th><th>Toneladas</th><th>Estatus</th>'+
+    '</tr></thead><tbody>'+buildRows('z3')+'</tbody></table>'+
+    '<h2 style="margin-top:24px;">ZIMIX 4</h2>'+
+    '<table><thead><tr>'+
+    '<th>Producto</th><th>Supersacos</th><th>Costales 50kg</th><th>Total kg</th><th>Toneladas</th><th>Estatus</th>'+
+    '</tr></thead><tbody>'+buildRows('z4')+'</tbody></table>'+
+    '<div style="margin-top:20px;padding:12px;background:#f5f0e8;border-radius:8px;font-size:12px;color:#666;">'+
+    'Este reporte fue generado automáticamente por el sistema ZIMIX. Para más información contacta al administrador.</div>'+
+    '<div style="text-align:center;margin-top:16px;">'+
+    '<button onclick="window.print()" style="background:#0a3424;color:white;border:none;padding:10px 24px;border-radius:8px;font-size:14px;cursor:pointer;">Imprimir / Guardar PDF</button></div>'+
+    '</body></html>';
+
+  var blob=new Blob([html],{type:'text/html'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='ZIMIX_Inventario_'+fecha.replace(/\//g,'-')+'.html';
+  a.click();
+  URL.revokeObjectURL(url);
+  shT('Reporte generado — abre el archivo y usa Imprimir para PDF','o');
+}
+
 function goBack(){
   if(fromUrl)return;
   ia=false;cc=null;
@@ -931,6 +1004,9 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('btn-conv').addEventListener('click',regConversion);
 
   // URL param
+  document.addEventListener('click', function(e){
+    if(e.target && e.target.id==='btn-pdf') generarPDF();
+  });
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
   var p=new URLSearchParams(window.location.search);
   var u=p.get('u');
