@@ -200,58 +200,28 @@ body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--
           <div class="folio-sub" id="fecha-ent"></div>
         </div>
         <div class="card">
-          <div class="ctit">Material recibido</div>
+          <div class="ctit">Datos generales</div>
           <div class="fld"><label>Origen</label>
             <select id="ent-origen">
               <option value="veracruz">Planta Veracruz</option>
               <option value="leon">León, Gto (Caucho)</option>
             </select>
           </div>
-          <div class="fld"><label>Producto</label>
-            <select id="ent-prod">
-              <option value="">Seleccionar...</option>
-              <option value="8-16">Arena 8-16</option>
-              <option value="20-40">Arena 20-40 / 16-30 beige</option>
-              <option value="40-60">Arena 40-60</option>
-              <option value="70-80">Arena 70-80 (Planta)</option>
-              <option value="80-90">Arena 80-90</option>
-              <option value="90-100">Arena 90-100 (Fina)</option>
-              <option value="4-8">Arena 4-8</option>
-              <option value="16-30c">Arena 16-30 Café</option>
-              <option value="grava-1/4">Grava 1/4 - 3/8</option>
-              <option value="grava-1/2">Grava 1/2 - 3/4</option>
-              <option value="grava-1">Grava 1/2 - 1</option>
-              <option value="grava-1-2">Grava 1 - 2"</option>
-              <option value="mezcla-ternium">Mezcla Ternium</option>
-              <option value="caucho">Caucho</option>
-            </select>
-          </div>
-          <div class="fr">
-            <div class="fld"><label>Cantidad</label><input type="number" id="ent-cant" placeholder="0" oninput="calcEnt()"/></div>
-            <div class="fld"><label>Presentacion</label>
-              <select id="ent-pres" onchange="calcEnt()">
-                <option value="ss1000">Supersaco 1,000 kg</option>
-                <option value="ss1500">Supersaco 1,500 kg</option>
-                <option value="ss2000">Supersaco 2,000 kg</option>
-                <option value="c50">Costal 50 kg</option>
-                <option value="ton">Tonelada</option>
-              </select>
-            </div>
-          </div>
-          <div class="ntag" id="ent-preview"></div>
+          <div class="fld"><label>No. de unidad / placas</label><input type="text" id="ent-placas" placeholder="Ej. 94BE8U"/></div>
           <div class="fld" id="ent-bodega-fld"><label>Bodega destino</label>
             <select id="ent-bodega">
               <option value="z3">ZIMIX 3</option>
               <option value="z4">ZIMIX 4</option>
             </select>
           </div>
-          <div class="fld"><label>No. de unidad / placas</label><input type="text" id="ent-placas" placeholder="Ej. 94BE8U"/></div>
-          <div class="fld"><label>Comentarios</label><textarea id="ent-notas" placeholder="Observaciones, referencia de origen..."></textarea></div>
         </div>
+        <div id="ent-lineas"><!-- líneas de producto --></div>
+        <button class="sbmt sec" id="btn-add-ent" style="margin-bottom:8px;"><i class="ti ti-plus"></i> Agregar otro producto</button>
+        <div class="fld"><label>Comentarios</label><textarea id="ent-notas" placeholder="Observaciones..."></textarea></div>
         <button class="sbmt" id="btn-ent"><i class="ti ti-arrow-down-circle"></i> Registrar entrada</button>
       </div>
 
-      <!-- SALIDA -->
+<!-- SALIDA -->
       <div id="form-sal" style="display:none;">
         <div class="folio-box" style="background:linear-gradient(135deg,#7a1a1a 0%,#c0392b 100%);">
           <div class="folio-label">Remision de salida</div>
@@ -259,54 +229,23 @@ body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--
           <div class="folio-sub" id="fecha-sal"></div>
         </div>
         <div class="card">
-          <div class="ctit">Material despachado</div>
-          <div class="fld"><label>Producto</label>
-            <select id="sal-prod">
-              <option value="">Seleccionar...</option>
-              <option value="8-16">Arena 8-16</option>
-              <option value="20-40">Arena 20-40 / 16-30 beige</option>
-              <option value="40-60">Arena 40-60</option>
-              <option value="70-80">Arena 70-80 (Planta)</option>
-              <option value="80-90">Arena 80-90</option>
-              <option value="90-100">Arena 90-100 (Fina)</option>
-              <option value="4-8">Arena 4-8</option>
-              <option value="16-30c">Arena 16-30 Café</option>
-              <option value="grava-1/4">Grava 1/4 - 3/8</option>
-              <option value="grava-1/2">Grava 1/2 - 3/4</option>
-              <option value="grava-1">Grava 1/2 - 1</option>
-              <option value="grava-1-2">Grava 1 - 2"</option>
-              <option value="mezcla-ternium">Mezcla Ternium</option>
-              <option value="caucho">Caucho</option>
-            </select>
-          </div>
-          <div class="fr">
-            <div class="fld"><label>Cantidad</label><input type="number" id="sal-cant" placeholder="0" oninput="calcSal()"/></div>
-            <div class="fld"><label>Presentacion</label>
-              <select id="sal-pres" onchange="calcSal()">
-                <option value="ss1000">Supersaco 1,000 kg</option>
-                <option value="ss1500">Supersaco 1,500 kg</option>
-                <option value="ss2000">Supersaco 2,000 kg</option>
-                <option value="c50">Costal 50 kg</option>
-                <option value="ton">Tonelada</option>
-                <option value="kg">Kilogramo</option>
-              </select>
-            </div>
-          </div>
-          <div class="ntag" id="sal-preview"></div>
+          <div class="ctit">Datos generales</div>
+          <div class="fld"><label>Cliente</label><input type="text" id="sal-cliente" placeholder="Nombre del cliente"/></div>
           <div class="fld" id="sal-bodega-fld"><label>Bodega origen</label>
             <select id="sal-bodega">
               <option value="z3">ZIMIX 3</option>
               <option value="z4">ZIMIX 4</option>
             </select>
           </div>
-          <div class="fld"><label>Cliente</label><input type="text" id="sal-cliente" placeholder="Nombre del cliente"/></div>
-          <div class="fld"><label>Comentarios</label><textarea id="sal-notas" placeholder="No. remision entregada, observaciones..."></textarea></div>
         </div>
-        <div id="sal-stock-warn" class="ntag warn" style="margin-bottom:12px;"></div>
+        <div id="sal-lineas"><!-- líneas de producto --></div>
+        <button class="sbmt sec" id="btn-add-sal" style="margin-bottom:8px;"><i class="ti ti-plus"></i> Agregar otro producto</button>
+        <div id="sal-stock-warn" class="ntag warn" style="margin-bottom:8px;"></div>
+        <div class="fld"><label>Comentarios</label><textarea id="sal-notas" placeholder="No. remision entregada, observaciones..."></textarea></div>
         <button class="sbmt danger" id="btn-sal"><i class="ti ti-arrow-up-circle"></i> Registrar salida</button>
       </div>
 
-      <!-- TRANSFERENCIA -->
+<!-- TRANSFERENCIA -->
       <div id="form-trf" style="display:none;">
         <div class="folio-box" style="background:linear-gradient(135deg,#1a3a7a 0%,#2d6bcf 100%);">
           <div class="folio-label">Transferencia entre bodegas</div>
@@ -542,19 +481,34 @@ function renderMovs(list){
   if(!list||!list.length){el.innerHTML='<p style="color:var(--fa);font-size:13px;text-align:center;padding:2rem 0;">Sin movimientos aun.</p>';return;}
   var badges={ent:'b-ent',sal:'b-sal',trf:'b-trf',conv:'b-conv'};
   var labels={ent:'Entrada',sal:'Salida',trf:'Transferencia',conv:'Conversion'};
-  el.innerHTML=list.slice(0,30).map(function(m){
-    var kgStr=m.kg?m.kg.toLocaleString()+' kg':'—';
+  // Group by folio to show multi-product movements together
+  var byFolio={};var folioOrder=[];
+  list.slice(0,50).forEach(function(m){
+    if(!byFolio[m.folio]){byFolio[m.folio]=[];folioOrder.push(m.folio);}
+    byFolio[m.folio].push(m);
+  });
+  el.innerHTML=folioOrder.map(function(folio){
+    var movs=byFolio[folio];
+    var m=movs[0];
+    var totalKg=movs.reduce(function(s,x){return s+(x.kg||0);},0);
     var detail='';
     if(m.tipo==='trf') detail='De '+m.de+' → '+m.a;
-    else if(m.tipo==='ent') detail='De '+m.origen+' → '+m.bodega;
-    else if(m.tipo==='sal') detail='Cliente: '+m.cliente;
-    else if(m.tipo==='conv') detail='Conversion en '+m.bodega;
+    else if(m.tipo==='ent') detail='De '+(m.origen||'')+'→ '+(m.bodega||'');
+    else if(m.tipo==='sal') detail='Cliente: '+(m.cliente||'—');
+    else if(m.tipo==='conv') detail='Conversión en '+(m.bodega||'');
+    var productLines=movs.map(function(x){
+      var cantStr=x.cant?x.cant+' '+x.pres:'';
+      return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-top:.5px solid var(--bd);font-size:12px;">'+
+        '<span style="color:var(--tx);font-weight:500;">'+(PRODS[x.prod]||x.prod)+'</span>'+
+        '<span style="color:var(--mu);">'+cantStr+' &nbsp;·&nbsp; '+(x.kg?x.kg.toLocaleString()+' kg':'')+'</span></div>';
+    }).join('');
     return '<div class="mov">'+
       '<div class="mov-top"><div>'+
-      '<div class="mov-folio"><span class="badge '+badges[m.tipo]+'">'+labels[m.tipo]+'</span> &nbsp;'+m.folio+'</div>'+
-      '<div class="mov-sub">'+PRODS[m.prod]||m.prod+' &nbsp;·&nbsp; '+m.fecha+'</div>'+
-      '</div><div class="mov-qty">'+(m.tipo==='sal'?'<span style="color:var(--dtx);">-</span>':'<span style="color:var(--stx);">+</span>')+kgStr+'</div></div>'+
-      '<div class="mov-detail">'+detail+(m.notas?' &nbsp;·&nbsp; '+m.notas:'')+'</div>'+
+      '<div class="mov-folio"><span class="badge '+badges[m.tipo]+'">'+labels[m.tipo]+'</span> &nbsp;'+folio+'</div>'+
+      '<div class="mov-sub">'+m.fecha+(movs.length>1?' &nbsp;·&nbsp; '+movs.length+' productos':'')+'</div>'+
+      '</div><div class="mov-qty">'+(m.tipo==='sal'?'<span style="color:var(--dtx);">-</span>':'<span style="color:var(--stx);">+</span>')+totalKg.toLocaleString()+' kg</div></div>'+
+      productLines+
+      '<div class="mov-detail" style="margin-top:4px;">'+detail+(m.notas?' &nbsp;·&nbsp; '+m.notas:'')+'</div>'+
       '</div>';
   }).join('');
 }
@@ -620,54 +574,137 @@ function shMovForm(type){
   });
 }
 
+function mkLineHTML(prefix, idx, showDel){
+  var del = showDel ? '<button data-prefix="'+prefix+'" data-idx="'+idx+'" class="del-linea" style="background:none;border:none;cursor:pointer;color:var(--dtx);font-size:18px;padding:0 4px;">×</button>' : '';
+  var presOpts = prefix==='ent'
+    ? '<option value="ss1000">Supersaco 1,000 kg</option><option value="ss1500">Supersaco 1,500 kg</option><option value="ss2000" selected>Supersaco 2,000 kg</option><option value="c50">Costal 50 kg</option><option value="ton">Tonelada</option>'
+    : '<option value="ss1000">Supersaco 1,000 kg</option><option value="ss1500">Supersaco 1,500 kg</option><option value="ss2000" selected>Supersaco 2,000 kg</option><option value="c50">Costal 50 kg</option><option value="ton">Tonelada</option><option value="kg">Kilogramo</option>';
+  return '<div class="card" id="linea-'+prefix+'-'+idx+'" style="margin-bottom:8px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
+    '<span style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;">Producto '+(idx+1)+'</span>'+del+'</div>'+
+    '<div class="fld"><label>Producto</label><select id="'+prefix+'-prod-'+idx+'">'+
+    '<option value="">Seleccionar...</option>'+
+    Object.keys(PRODS).map(function(k){return '<option value="'+k+'">'+PRODS[k]+'</option>';}).join('')+
+    '</select></div>'+
+    '<div class="fr">'+
+    '<div class="fld"><label>Cantidad</label><input type="number" id="'+prefix+'-cant-'+idx+'" data-prefix="'+prefix+'" data-idx="'+idx+'" class="linea-cant" placeholder="0"/></div>'+
+    '<div class="fld"><label>Presentación</label><select id="'+prefix+'-pres-'+idx+'" data-prefix="'+prefix+'" data-idx="'+idx+'" class="linea-pres">'+presOpts+'</select></div>'+
+    '</div>'+
+    '<div class="ntag" id="'+prefix+'-prev-'+idx+'"></div>'+
+    '</div>';
+}
+
+var entLineas=1, salLineas=1;
+
+function initLineas(){
+  document.getElementById('ent-lineas').innerHTML=mkLineHTML('ent',0,false);
+  document.getElementById('sal-lineas').innerHTML=mkLineHTML('sal',0,false);
+  entLineas=1; salLineas=1;
+}
+
+function addLinea(prefix){
+  var idx=prefix==='ent'?entLineas:salLineas;
+  var container=document.getElementById(prefix+'-lineas');
+  var div=document.createElement('div');
+  div.innerHTML=mkLineHTML(prefix,idx,true);
+  container.appendChild(div.firstChild);
+  if(prefix==='ent')entLineas++; else salLineas++;
+}
+
+function delLinea(prefix,idx){
+  var el=document.getElementById('linea-'+prefix+'-'+idx);
+  if(el)el.remove();
+}
+
+function calcLinea(prefix,idx){
+  var cant=parseFloat(document.getElementById(prefix+'-cant-'+idx).value)||0;
+  var pres=document.getElementById(prefix+'-pres-'+idx).value;
+  var kg=kgFromPres(cant,pres);
+  var el=document.getElementById(prefix+'-prev-'+idx);
+  if(kg>0){el.textContent=kg.toLocaleString()+' kg = '+(kg/1000).toFixed(2)+' ton';el.style.display='block';}
+  else el.style.display='none';
+}
+
+function getLineas(prefix){
+  var lineas=[];
+  document.querySelectorAll('[id^="linea-'+prefix+'-"]').forEach(function(div){
+    var idx=div.id.split('-').pop();
+    var prod=document.getElementById(prefix+'-prod-'+idx);
+    var cant=document.getElementById(prefix+'-cant-'+idx);
+    var pres=document.getElementById(prefix+'-pres-'+idx);
+    if(!prod||!cant||!pres)return;
+    if(!prod.value||!parseFloat(cant.value))return;
+    lineas.push({prod:prod.value,cant:parseFloat(cant.value),pres:pres.value});
+  });
+  return lineas;
+}
+
 function regEntrada(){
-  var prod=document.getElementById('ent-prod').value;
-  var cant=parseFloat(document.getElementById('ent-cant').value)||0;
-  var pres=document.getElementById('ent-pres').value;
+  var lineas=getLineas('ent');
+  if(!lineas.length){shT('Agrega al menos un producto','e');return;}
   var origen=document.getElementById('ent-origen').value;
-  var bod=document.getElementById('ent-bodega').value||cc;
+  var bod=document.getElementById('ent-bodega').value;
   var notas=document.getElementById('ent-notas').value.trim();
   var placas=document.getElementById('ent-placas').value.trim();
-  if(!prod||!cant){shT('Selecciona producto y cantidad','e');return;}
-  var kg=kgFromPres(cant,pres);
   var folio=fmtFolio('ent');
-  if(!INV[bod][prod]) INV[bod][prod]={ss:0,c50:0,kg_total:0};
-  if(pres.startsWith('ss')){INV[bod][prod].ss+=cant;} else if(pres==='c50'){INV[bod][prod].c50+=cant;}
-  INV[bod][prod].kg_total+=kg;
-  var movEnt={tipo:'ent',folio:folio,prod:prod,cant:cant,pres:LBL_PRES[pres]||pres,kg:kg,origen:origen==='veracruz'?'Planta Veracruz':'Leon Gto',bodega:bod==='z3'?'ZIMIX 3':'ZIMIX 4',placas:placas,notas:notas,fecha:todayStr()};
-  MOVS.unshift(movEnt);
-  saveToSheets(movEnt);
+  var bName=bod==='z3'?'ZIMIX 3':'ZIMIX 4';
+  var origenNm=origen==='veracruz'?'Planta Veracruz':'León Gto';
+  lineas.forEach(function(l){
+    var kg=kgFromPres(l.cant,l.pres);
+    var esSS=l.pres.startsWith('ss');
+    if(!INV[bod][l.prod])INV[bod][l.prod]={ss:0,c50:0,kg_total:0};
+    if(esSS){INV[bod][l.prod].ss+=l.cant;}else if(l.pres==='c50'){INV[bod][l.prod].c50+=l.cant;}
+    INV[bod][l.prod].kg_total+=kg;
+    var mov={tipo:'ent',folio:folio,prod:l.prod,cant:l.cant,pres:LBL_PRES[l.pres]||l.pres,kg:kg,
+      origen:origenNm,bodega:bName,placas:placas,notas:notas,fecha:todayStr()};
+    MOVS.unshift(mov);
+    saveToSheets(mov);
+  });
   COUNTERS.ent++;
-  document.getElementById('ent-cant').value='';document.getElementById('ent-notas').value='';document.getElementById('ent-placas').value='';document.getElementById('ent-preview').style.display='none';
+  document.getElementById('ent-notas').value='';
+  document.getElementById('ent-placas').value='';
+  initLineas();
   document.getElementById('folio-ent').textContent=fmtFolio('ent');
-  renderInv();shT('Entrada '+folio+' registrada — '+kg.toLocaleString()+' kg de '+PRODS[prod],'o');
-  shSc('inv');document.getElementById('tab-inv').classList.add('active');
-  document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-inv').classList.add('active');
+  renderInv();
+  shT('Entrada '+folio+' — '+lineas.length+' producto(s) registrado(s)','o');
+  shSc('inv');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-inv').classList.add('active');
 }
 
 function regSalida(){
-  var prod=document.getElementById('sal-prod').value;
-  var cant=parseFloat(document.getElementById('sal-cant').value)||0;
-  var pres=document.getElementById('sal-pres').value;
-  var bod=document.getElementById('sal-bodega').value||cc;
+  var lineas=getLineas('sal');
+  if(!lineas.length){shT('Agrega al menos un producto','e');return;}
+  var bod=document.getElementById('sal-bodega').value;
   var cliente=document.getElementById('sal-cliente').value.trim();
   var notas=document.getElementById('sal-notas').value.trim();
-  if(!prod||!cant){shT('Selecciona producto y cantidad','e');return;}
-  var kg=kgFromPres(cant,pres);
-  var disponible=INV[bod][prod]?INV[bod][prod].kg_total:0;
-  if(kg>disponible){shT('Saldo insuficiente','e');return;}
+  var bName=bod==='z3'?'ZIMIX 3':'ZIMIX 4';
+  // Check stock for all lines first
+  for(var i=0;i<lineas.length;i++){
+    var l=lineas[i];
+    var kg=kgFromPres(l.cant,l.pres);
+    var disponible=INV[bod][l.prod]?INV[bod][l.prod].kg_total:0;
+    if(kg>disponible){shT('Saldo insuficiente de '+PRODS[l.prod]+' en '+bName,'e');return;}
+  }
   var folio=fmtFolio('sal');
-  if(!INV[bod][prod]) INV[bod][prod]={ss:0,c50:0,kg_total:0};
-  if(pres.startsWith('ss')){INV[bod][prod].ss=Math.max(0,INV[bod][prod].ss-cant);}
-  else if(pres==='c50'){INV[bod][prod].c50=Math.max(0,INV[bod][prod].c50-cant);}
-  INV[bod][prod].kg_total=Math.max(0,INV[bod][prod].kg_total-kg);
-  var movSal={tipo:'sal',folio:folio,prod:prod,cant:cant,pres:LBL_PRES[pres]||pres,kg:kg,cliente:cliente,bodega:bod==='z3'?'ZIMIX 3':'ZIMIX 4',notas:notas,fecha:todayStr()};
-  MOVS.unshift(movSal);
-  saveToSheets(movSal);
+  lineas.forEach(function(l){
+    var kg=kgFromPres(l.cant,l.pres);
+    var esSS=l.pres.startsWith('ss');
+    if(!INV[bod][l.prod])INV[bod][l.prod]={ss:0,c50:0,kg_total:0};
+    if(esSS){INV[bod][l.prod].ss=Math.max(0,INV[bod][l.prod].ss-l.cant);}
+    else if(l.pres==='c50'){INV[bod][l.prod].c50=Math.max(0,INV[bod][l.prod].c50-l.cant);}
+    INV[bod][l.prod].kg_total=Math.max(0,INV[bod][l.prod].kg_total-kg);
+    var mov={tipo:'sal',folio:folio,prod:l.prod,cant:l.cant,pres:LBL_PRES[l.pres]||l.pres,kg:kg,
+      cliente:cliente,bodega:bName,notas:notas,fecha:todayStr()};
+    MOVS.unshift(mov);
+    saveToSheets(mov);
+  });
   COUNTERS.sal++;
-  document.getElementById('sal-cant').value='';document.getElementById('sal-notas').value='';document.getElementById('sal-cliente').value='';document.getElementById('sal-preview').style.display='none';document.getElementById('sal-stock-warn').style.display='none';
+  document.getElementById('sal-cliente').value='';
+  document.getElementById('sal-notas').value='';
+  document.getElementById('sal-stock-warn').style.display='none';
+  initLineas();
   document.getElementById('folio-sal').textContent=fmtFolio('sal');
-  renderInv();shT('Salida '+folio+' registrada — '+kg.toLocaleString()+' kg de '+PRODS[prod],'o');
+  renderInv();
+  shT('Salida '+folio+' — '+lineas.length+' producto(s) registrado(s)','o');
   shSc('inv');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-inv').classList.add('active');
 }
 
@@ -763,6 +800,7 @@ function setupUser(who){
   var salBod=document.getElementById('sal-bodega');
   if(entBod)entBod.value=who;
   if(salBod)salBod.value=who;
+  initLineas();
   renderInv();
   loadFromSheets();
   shSc('nvo');shMovForm('ent');
@@ -787,7 +825,7 @@ function chkPwd(){
     document.getElementById('folio-sal').textContent=fmtFolio('sal');
     document.getElementById('folio-trf').textContent=fmtFolio('trf');
     document.getElementById('folio-conv').textContent=fmtFolio('conv');
-    bldLinks();renderInv();loadFromSheets();
+    initLineas();bldLinks();renderInv();loadFromSheets();
     shSc('inv');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-inv').classList.add('active');
   } else document.getElementById('perr').style.display='block';
 }
@@ -1116,6 +1154,20 @@ document.addEventListener('DOMContentLoaded',function(){
   // Action buttons
   document.getElementById('btn-ent').addEventListener('click',regEntrada);
   document.getElementById('btn-sal').addEventListener('click',regSalida);
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    if(t.id==='btn-add-ent'||t.closest&&t.closest('#btn-add-ent'))addLinea('ent');
+    if(t.id==='btn-add-sal'||t.closest&&t.closest('#btn-add-sal'))addLinea('sal');
+    if(t.classList&&t.classList.contains('del-linea'))delLinea(t.dataset.prefix,t.dataset.idx);
+  });
+  document.addEventListener('input',function(e){
+    var t=e.target;
+    if(t.classList&&t.classList.contains('linea-cant'))calcLinea(t.dataset.prefix,t.dataset.idx);
+  });
+  document.addEventListener('change',function(e){
+    var t=e.target;
+    if(t.classList&&t.classList.contains('linea-pres'))calcLinea(t.dataset.prefix,t.dataset.idx);
+  });
   document.getElementById('btn-trf').addEventListener('click',regTransferencia);
   document.getElementById('btn-conv').addEventListener('click',regConversion);
 
