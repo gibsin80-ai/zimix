@@ -178,6 +178,7 @@ body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--
     <button class="nbtn" id="tab-inv">Inventario</button>
     <button class="nbtn" id="tab-mov">Movimientos</button>
     <button class="nbtn" id="tab-adm" style="display:none;">Admin</button>
+    <button class="nbtn" id="tab-dash" style="display:none;">Dashboard</button>
   </nav>
 
   <div class="ct" id="mct" style="display:none;">
@@ -221,6 +222,7 @@ body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--
               <option value="grava-1/2">Grava 1/2 - 3/4</option>
               <option value="grava-1">Grava 1/2 - 1</option>
               <option value="grava-1-2">Grava 1 - 2"</option>
+              <option value="mezcla-ternium">Mezcla Ternium</option>
               <option value="caucho">Caucho</option>
             </select>
           </div>
@@ -273,6 +275,7 @@ body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--
               <option value="grava-1/2">Grava 1/2 - 3/4</option>
               <option value="grava-1">Grava 1/2 - 1</option>
               <option value="grava-1-2">Grava 1 - 2"</option>
+              <option value="mezcla-ternium">Mezcla Ternium</option>
               <option value="caucho">Caucho</option>
             </select>
           </div>
@@ -335,6 +338,7 @@ body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--
               <option value="grava-1/2">Grava 1/2 - 3/4</option>
               <option value="grava-1">Grava 1/2 - 1</option>
               <option value="grava-1-2">Grava 1 - 2"</option>
+              <option value="mezcla-ternium">Mezcla Ternium</option>
               <option value="caucho">Caucho</option>
             </select>
           </div>
@@ -459,6 +463,7 @@ var PRODS = {
   '4-8':'Arena 4-8','16-30c':'Arena 16-30 Cafe',
   'grava-1/4':'Grava 1/4-3/8','grava-1/2':'Grava 1/2-3/4','grava-1':'Grava 1/2-1',
   'grava-1-2':'Grava 1-2"',
+  'mezcla-ternium':'Mezcla Ternium',
   'caucho':'Caucho'
 };
 var KG_PRES = {ss1000:1000,ss1500:1500,ss2000:2000,c50:50,ton:1000,kg:1};
@@ -770,6 +775,7 @@ function chkPwd(){
     document.getElementById('mnav').style.display='flex';
     document.getElementById('mct').style.display='block';
     document.getElementById('tab-adm').style.display='block';
+    document.getElementById('tab-dash').style.display='block';
     document.getElementById('adi').style.display='inline-block';
     // bodega fields already visible
     document.getElementById('ttl').textContent='Panel Admin';
@@ -973,6 +979,99 @@ function generarPDF(){
   shT('Reporte generado — abre y usa Imprimir para PDF','o');
 }
 
+// Stock recomendado (supersacos 2 ton y toneladas)
+var STOCK_REC = {
+  '40-60':               {min_ss:92,  saf_ss:138, max_ss:230, min_t:184, saf_t:276, max_t:459},
+  '20-40/16-30 beige':   {min_ss:70,  saf_ss:105, max_ss:176, min_t:140, saf_t:211, max_t:351},
+  '80-90':               {min_ss:43,  saf_ss:65,  max_ss:108, min_t:86,  saf_t:129, max_t:215},
+  'Mezcla Ternium':      {min_ss:76,  saf_ss:115, max_ss:191, min_t:153, saf_t:229, max_t:382},
+  '70-80 (Planta)':      {min_ss:29,  saf_ss:44,  max_ss:72,  min_t:58,  saf_t:87,  max_t:144},
+  '16-30 cafe':          {min_ss:11,  saf_ss:16,  max_ss:27,  min_t:22,  saf_t:33,  max_t:55},
+  '8-16':                {min_ss:5,   saf_ss:7,   max_ss:12,  min_t:10,  saf_t:14,  max_t:24},
+  '90-100 (Fina)':       {min_ss:3,   saf_ss:4,   max_ss:7,   min_t:6,   saf_t:9,   max_t:14},
+  '4-8':                 {min_ss:2,   saf_ss:3,   max_ss:4,   min_t:3,   saf_t:5,   max_t:8},
+  '1/4-3/8 Davila':      {min_ss:1,   saf_ss:2,   max_ss:3,   min_t:2,   saf_t:3,   max_t:6},
+  '1/2-3/4':             {min_ss:1,   saf_ss:1,   max_ss:2,   min_t:1,   saf_t:2,   max_t:4},
+  '1/2-1':               {min_ss:2,   saf_ss:3,   max_ss:4,   min_t:3,   saf_t:5,   max_t:9},
+};
+
+async function loadDashboard(){
+  var el=document.getElementById('dash-content');
+  el.innerHTML='<p style="font-size:13px;color:var(--fa);text-align:center;padding:2rem 0;">Cargando inventario desde Sheets...</p>';
+  try{
+    var res=await fetch(SU+'?tipo=inventario');
+    var rows=await res.json();
+    // Reconstruir saldo desde movimientos
+    var saldo={};
+    ARENAS_LIST.forEach(function(a){saldo[a]={kg:0,ss:0};});
+    if(rows&&rows.length){
+      rows.forEach(function(r){
+        var arena=r['Arena'];
+        var kg=parseFloat(r['Kg'])||0;
+        if(!saldo[arena])saldo[arena]={kg:0,ss:0};
+        if(r['Tipo']==='entrada'){
+          saldo[arena].kg+=kg;
+          if((r['Unidad']||'').toLowerCase().includes('supersaco')) saldo[arena].ss+=parseFloat(r['Cantidad'])||0;
+        } else if(r['Tipo']==='salida'){
+          saldo[arena].kg=Math.max(0,saldo[arena].kg-kg);
+        }
+      });
+    }
+    // Apply initial stock (13/May/2026)
+    var initStock={
+      '40-60':{b4:{ss:60,kg:120000},b3:{ss:16,kg:32000}},
+      '70-80 (Planta)':{b4:{ss:15,kg:30000},b3:{ss:0,kg:0}},
+      '20-40/16-30 beige':{b4:{ss:32,kg:64000},b3:{ss:70,kg:140000}},
+      '8-16':{b4:{ss:6,kg:12000},b3:{ss:0,kg:0}},
+      '16-30 cafe':{b4:{ss:9,kg:18000},b3:{ss:36.5,kg:73000}},
+      '90-100 (Fina)':{b4:{ss:0,kg:0},b3:{ss:46,kg:92000}},
+      '4-8':{b4:{ss:0,kg:0},b3:{ss:10,kg:20000}},
+      '1/4-3/8 Davila':{b4:{ss:0,kg:0},b3:{ss:13,kg:26000}},
+    };
+    Object.keys(initStock).forEach(function(a){
+      var tot=(initStock[a].b4.kg||0)+(initStock[a].b3.kg||0);
+      var ss=(initStock[a].b4.ss||0)+(initStock[a].b3.ss||0);
+      if(!saldo[a])saldo[a]={kg:0,ss:0};
+      saldo[a].kg+=tot;
+      saldo[a].ss+=ss;
+    });
+    renderDashboard(saldo);
+  }catch(e){
+    el.innerHTML='<p style="font-size:13px;color:var(--dtx);text-align:center;padding:2rem 0;">Error al cargar. Verifica tu conexión.</p>';
+  }
+}
+
+function renderDashboard(saldo){
+  var el=document.getElementById('dash-content');
+  var rows=ARENAS_LIST.map(function(a){
+    var kg=saldo[a]?saldo[a].kg:0;
+    var ton=kg/1000;
+    var ss=ton/2; // supersacos 2 ton estimados
+    var rec=STOCK_REC[a];
+    var semColor,semLabel;
+    if(!rec){semColor='#ccc';semLabel='Sin datos';}
+    else if(ton>=rec.saf_t){semColor='#2dba72';semLabel='OK';}
+    else if(ton>=rec.min_t){semColor='#f5a623';semLabel='Bajo';}
+    else{semColor='#e74c3c';semLabel='Crítico';}
+    var barW=rec?Math.min(100,Math.round((ton/rec.max_t)*100)):0;
+    var barColor=semColor;
+    return '<div style="background:var(--sf);border:.5px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:8px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
+      '<div style="font-size:14px;font-weight:600;">'+a+'</div>'+
+      '<span style="background:'+semColor+';color:#fff;font-size:10px;padding:3px 9px;border-radius:999px;font-weight:700;">'+semLabel+'</span></div>'+
+      '<div style="background:var(--bd);border-radius:999px;height:6px;margin-bottom:8px;">'+
+      '<div style="width:'+barW+'%;height:6px;border-radius:999px;background:'+barColor+';transition:width .3s;"></div></div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:11px;">'+
+      '<div><div style="color:var(--mu);">Actual</div><div style="font-weight:700;color:var(--tx);">'+ton.toFixed(1)+' ton</div><div style="color:var(--mu);">~'+Math.round(ss)+' ss</div></div>'+
+      (rec?
+      '<div><div style="color:var(--mu);">Mínimo</div><div style="font-weight:700;color:#e74c3c;">'+rec.min_t+' ton</div><div style="color:var(--mu);">'+rec.min_ss+' ss</div></div>'+
+      '<div><div style="color:var(--mu);">Safety</div><div style="font-weight:700;color:#f5a623;">'+rec.saf_t+' ton</div><div style="color:var(--mu);">'+rec.saf_ss+' ss</div></div>'
+      :'<div></div><div></div>')+
+      '</div></div>';
+  }).join('');
+  el.innerHTML=rows;
+}
+
 function goBack(){
   if(fromUrl)return;
   ia=false;cc=null;
@@ -995,6 +1094,7 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('tab-inv').addEventListener('click',function(){shSc('inv');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
   document.getElementById('tab-mov').addEventListener('click',function(){shSc('mov');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
   document.getElementById('tab-adm').addEventListener('click',function(){shSc('adm');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
+  document.getElementById('tab-dash').addEventListener('click',function(){shSc('dash');loadDashboard();document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
 
   // Mov form tabs
   document.getElementById('mt-ent').addEventListener('click',function(){shMovForm('ent');});
