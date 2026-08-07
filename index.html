@@ -317,7 +317,7 @@ var AP='1234';
 var SU='https://script.google.com/macros/s/AKfycbybORXq_Pt5-TqvvW38v6TpvgEFf3NJGEs4Jt70zqzBpN7BmWHsP3kqodyGsWTFaojs/exec';
 var PRODS={
   '8-16':'Arena 8-16','20-40':'Arena 20-40/16-30 beige','40-60':'Arena 40-60',
-  '70-80':'Arena 70-80 (Planta)','80-90':'Arena 80-90','90-100':'Arena 90-100 (Fina)',
+  '70-80':'Arena 70-80 (Planta)','80-90':'Arena 80-90 Fina',
   '4-8':'Arena 4-8','16-30c':'Arena 16-30 Cafe',
   'grava-1/4':'Grava 1/4-3/8','grava-1/2':'Grava 1/2-3/4','grava-1':'Grava 1/2-1',
   'grava-1-2':'Grava 1-2"','mezcla-ternium':'Mezcla Ternium','caucho':'Caucho'
@@ -325,14 +325,14 @@ var PRODS={
 var KG_PRES={ss1000:1000,ss1500:1500,ss2000:2000,c50:50,ton:1000,kg:1};
 var LBL_PRES={ss1000:'Supersaco 1,000 kg',ss1500:'Supersaco 1,500 kg',ss2000:'Supersaco 2,000 kg',c50:'Costal 50 kg',ton:'Tonelada',kg:'Kilogramo'};
 var STOCK_REC={
-  '40-60':          {min_ss:92, saf_ss:138,max_ss:230,min_t:184,saf_t:276,max_t:459},
-  '20-40':          {min_ss:70, saf_ss:105,max_ss:176,min_t:140,saf_t:211,max_t:351},
-  '80-90':          {min_ss:43, saf_ss:65, max_ss:108,min_t:86, saf_t:129,max_t:215},
+  '40-60':          {min_ss:92, saf_ss:138,max_ss:230,min_t:184,saf_t:276,max_t:459, min_c50:800,max_c50:1300},
+  '20-40':          {min_ss:70, saf_ss:105,max_ss:176,min_t:140,saf_t:211,max_t:351, min_c50:800,max_c50:1300},
+  '80-90':          {min_ss:43, saf_ss:65, max_ss:108,min_t:86, saf_t:129,max_t:215, min_c50:400,max_c50:800},
   'mezcla-ternium': {min_ss:76, saf_ss:115,max_ss:191,min_t:153,saf_t:229,max_t:382},
   '70-80':          {min_ss:29, saf_ss:44, max_ss:72, min_t:58, saf_t:87, max_t:144},
-  '16-30c':         {min_ss:11, saf_ss:16, max_ss:27, min_t:22, saf_t:33, max_t:55},
+  '16-30c':         {min_ss:11, saf_ss:16, max_ss:27, min_t:22, saf_t:33, max_t:55,  min_c50:400,max_c50:800},
   '8-16':           {min_ss:5,  saf_ss:7,  max_ss:12, min_t:10, saf_t:14, max_t:24},
-  '90-100':         {min_ss:3,  saf_ss:4,  max_ss:7,  min_t:6,  saf_t:9,  max_t:14},
+
   '4-8':            {min_ss:2,  saf_ss:3,  max_ss:4,  min_t:3,  saf_t:5,  max_t:8},
   'grava-1':        {min_ss:2,  saf_ss:3,  max_ss:4,  min_t:3,  saf_t:5,  max_t:9},
   'grava-1/4':      {min_ss:1,  saf_ss:2,  max_ss:3,  min_t:2,  saf_t:3,  max_t:6},
@@ -629,6 +629,12 @@ function renderInv(){
   if(itot)itot.innerHTML=bldTotal();
 }
 
+function semaforo(val, min, max){
+  if(val>=max*0.7)return '#2dba72';
+  if(val>=min)return '#f5a623';
+  return '#e74c3c';
+}
+
 function renderDashboard(){
   var el=document.getElementById('dash-content');
   if(!el)return;
@@ -637,6 +643,7 @@ function renderDashboard(){
     var kgTot=(d3.kg_total||0)+(d4.kg_total||0);var ton=kgTot/1000;
     var ssTot=(d3.ss||0)+(d4.ss||0);var c50Tot=(d3.c50||0)+(d4.c50||0);
     var rec=STOCK_REC[p];
+    // Semáforo supersacos
     var semColor,semLabel;
     if(!rec){semColor='#bbb';semLabel='Sin ref.';}
     else if(ton>=rec.saf_t){semColor='#2dba72';semLabel='OK';}
@@ -647,17 +654,36 @@ function renderDashboard(){
     if(ssTot>0)detalle+=Math.round(ssTot)+' ss';
     if(c50Tot>0)detalle+=(detalle?' · ':'')+Math.round(c50Tot)+' cost.';
     if(!detalle)detalle='Sin stock';
+    // Barra de costales (solo arenas que aplican)
+    var costalBar='';
+    if(rec&&rec.min_c50){
+      var cColor=semaforo(c50Tot,rec.min_c50,rec.max_c50);
+      var cLabel=c50Tot>=rec.max_c50*0.7?'OK':c50Tot>=rec.min_c50?'Bajo':'Crítico';
+      var cBarW=Math.min(100,Math.round((c50Tot/(rec.max_c50||1))*100));
+      costalBar='<div style="margin-top:10px;padding-top:10px;border-top:.5px solid var(--bd);">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">'+
+        '<span style="font-size:11px;color:var(--mu);font-weight:600;">Costales 50 kg</span>'+
+        '<span style="background:'+cColor+';color:#fff;font-size:10px;padding:2px 7px;border-radius:999px;font-weight:700;">'+cLabel+'</span></div>'+
+        '<div style="background:var(--bd);border-radius:999px;height:5px;margin-bottom:6px;">'+
+        '<div style="width:'+cBarW+'%;height:5px;border-radius:999px;background:'+cColor+';"></div></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:11px;">'+
+        '<div><div style="color:var(--mu);">Actual</div><div style="font-weight:700;">'+Math.round(c50Tot)+' cost.</div><div style="color:var(--mu);">'+(c50Tot*50/1000).toFixed(1)+' ton</div></div>'+
+        '<div><div style="color:var(--mu);">Mínimo</div><div style="font-weight:700;color:#e74c3c;">'+rec.min_c50+' cost.</div><div style="color:var(--mu);">'+(rec.min_c50*50/1000).toFixed(0)+' ton</div></div>'+
+        '<div><div style="color:var(--mu);">Máximo</div><div style="font-weight:700;color:#2dba72;">'+rec.max_c50+' cost.</div><div style="color:var(--mu);">'+(rec.max_c50*50/1000).toFixed(0)+' ton</div></div>'+
+        '</div></div>';
+    }
     return '<div class="dash-card">'+
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+
       '<div style="font-size:14px;font-weight:600;">'+PRODS[p]+'</div>'+
       '<span style="background:'+semColor+';color:#fff;font-size:10px;padding:3px 9px;border-radius:999px;font-weight:700;">'+semLabel+'</span></div>'+
-      '<div style="background:var(--bd);border-radius:999px;height:6px;margin-bottom:8px;">'+
+      '<div style="font-size:10px;color:var(--mu);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Supersacos</div>'+
+      '<div style="background:var(--bd);border-radius:999px;height:6px;margin-bottom:6px;">'+
       '<div style="width:'+barW+'%;height:6px;border-radius:999px;background:'+semColor+';"></div></div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;font-size:11px;">'+
       '<div><div style="color:var(--mu);">Actual</div><div style="font-weight:700;">'+ton.toFixed(1)+' ton</div><div style="color:var(--mu);">'+detalle+'</div></div>'+
       (rec?'<div><div style="color:var(--mu);">Mínimo</div><div style="font-weight:700;color:#e74c3c;">'+rec.min_t+' ton</div><div style="color:var(--mu);">'+rec.min_ss+' ss</div></div>'+
       '<div><div style="color:var(--mu);">Safety</div><div style="font-weight:700;color:#f5a623;">'+rec.saf_t+' ton</div><div style="color:var(--mu);">'+rec.saf_ss+' ss</div></div>':'')+
-      '</div></div>';
+      '</div>'+costalBar+'</div>';
   }).join('');
   el.innerHTML=html;
 }
@@ -735,6 +761,9 @@ async function loadFromSheets(){
     MOVS=[];
     Object.keys(PRODS).forEach(function(p){INV.z3[p]={ss:0,c50:0,kg_total:0};INV.z4[p]={ss:0,c50:0,kg_total:0};});
     var prodRevMap={};Object.keys(PRODS).forEach(function(k){prodRevMap[PRODS[k]]=k;});
+    // Unify 90-100 into 80-90
+    prodRevMap['Arena 90-100 (Fina)']='80-90';
+    prodRevMap['Arena 90-100']='80-90';
     rows.forEach(function(r){
       var prodKey=prodRevMap[r['Producto']]||r['Producto'];
       var kg=parseFloat(r['Kg'])||0,cant=parseFloat(r['Cantidad'])||0;
