@@ -725,7 +725,11 @@ function renderMovs(list){
         '<span style="font-weight:500;">'+(PRODS[x.prod]||x.prod)+'</span>'+
         '<span style="color:var(--mu);">'+x.cant+' '+x.pres+' · '+x.kg.toLocaleString()+' kg</span></div>';
     }).join('');
-    var editBtn=ia?'<button class="edit-mov-btn" data-folio="'+folio+'" style="margin-top:8px;width:100%;padding:7px;background:none;border:.5px solid var(--bds);border-radius:var(--rs);font-size:12px;cursor:pointer;font-family:var(--fn);color:var(--mu);">✏️ Editar movimiento</button>':'';
+    var adminBtns=ia?'<div style="display:flex;gap:6px;margin-top:8px;">'+
+      '<button class="edit-mov-btn" data-folio="'+folio+'" style="flex:1;padding:7px;background:none;border:.5px solid var(--bds);border-radius:var(--rs);font-size:12px;cursor:pointer;font-family:var(--fn);color:var(--mu);">✏️ Editar</button>'+
+      '<button class="del-mov-btn" data-folio="'+folio+'" style="flex:1;padding:7px;background:none;border:.5px solid var(--dtx);border-radius:var(--rs);font-size:12px;cursor:pointer;font-family:var(--fn);color:var(--dtx);">🗑 Eliminar</button>'+
+      '</div>':'';
+    var editBtn=adminBtns;
     return '<div class="mov">'+
       '<div class="mov-top"><div>'+
       '<div class="mov-folio"><span class="badge '+badges[m.tipo]+'">'+labels[m.tipo]+'</span>&nbsp;'+folio+'</div>'+
@@ -877,6 +881,22 @@ function openEditModal(folio){
   modal.style.display='flex';
 }
 
+function delMov(folio){
+  if(!confirm('¿Eliminar el movimiento '+folio+'? Esta acción no se puede deshacer en memoria.')) return;
+  var movs=MOVS.filter(function(m){return m.folio===folio;});
+  movs.forEach(function(mv){
+    var bod=mv.bodega==='ZIMIX 3'?'z3':mv.bodega==='ZIMIX 4'?'z4':null;
+    var prod=mv.prod;
+    if(bod&&prod&&INV[bod][prod]){
+      if(mv.tipo==='sal'){INV[bod][prod].kg_total=Math.max(0,INV[bod][prod].kg_total+(mv.kg||0));}
+      else if(mv.tipo==='ent'){INV[bod][prod].kg_total=Math.max(0,INV[bod][prod].kg_total-(mv.kg||0));}
+    }
+  });
+  MOVS=MOVS.filter(function(m){return m.folio!==folio;});
+  renderInv();renderMovs(MOVS);
+  shT('Movimiento '+folio+' eliminado en memoria — borra la fila en Sheets para que persista','o');
+}
+
 function saveEdit(){
   if(!editMovData)return;
   var newCant = parseFloat(document.getElementById('edit-cant').value)||0;
@@ -979,7 +999,9 @@ document.addEventListener('DOMContentLoaded',function(){
   });
   document.addEventListener('click',function(e){
     var t=e.target;
-    if(t.classList&&t.classList.contains('edit-mov-btn'))openEditModal(t.dataset.folio);
+    if(!t.classList)return;
+    if(t.classList.contains('edit-mov-btn'))openEditModal(t.dataset.folio);
+    if(t.classList.contains('del-mov-btn'))delMov(t.dataset.folio);
   });
   document.getElementById('modal-close').addEventListener('click',function(){document.getElementById('modal-edit').style.display='none';});
   document.getElementById('btn-edit-save').addEventListener('click',saveEdit);
