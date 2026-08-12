@@ -725,13 +725,15 @@ function renderMovs(list){
         '<span style="font-weight:500;">'+(PRODS[x.prod]||x.prod)+'</span>'+
         '<span style="color:var(--mu);">'+x.cant+' '+x.pres+' · '+x.kg.toLocaleString()+' kg</span></div>';
     }).join('');
+    var editBtn=ia?'<button class="edit-mov-btn" data-folio="'+folio+'" style="margin-top:8px;width:100%;padding:7px;background:none;border:.5px solid var(--bds);border-radius:var(--rs);font-size:12px;cursor:pointer;font-family:var(--fn);color:var(--mu);">✏️ Editar movimiento</button>':'';
     return '<div class="mov">'+
       '<div class="mov-top"><div>'+
       '<div class="mov-folio"><span class="badge '+badges[m.tipo]+'">'+labels[m.tipo]+'</span>&nbsp;'+folio+'</div>'+
       '<div class="mov-sub">'+m.fecha+(movs.length>1?' · '+movs.length+' productos':'')+'</div>'+
       '</div><div class="mov-qty">'+(m.tipo==='sal'?'<span style="color:var(--dtx);">-</span>':'<span style="color:var(--stx);">+</span>')+totalKg.toLocaleString()+' kg</div></div>'+
       productLines+
-      '<div class="mov-detail" style="margin-top:4px;">'+detail+(m.notas?' · '+m.notas:'')+'</div></div>';
+      '<div class="mov-detail" style="margin-top:4px;">'+detail+(m.notas?' · '+m.notas:'')+'</div>'+
+      editBtn+'</div>';
   }).join('');
 }
 
@@ -857,6 +859,57 @@ function shT(msg,type){
   setTimeout(function(){t.style.opacity='0';},3500);
 }
 
+var editMovData = null;
+
+function openEditModal(folio){
+  var movs = MOVS.filter(function(m){return m.folio===folio;});
+  if(!movs.length){shT('Movimiento no encontrado','e');return;}
+  var m = movs[0];
+  editMovData = {folio:folio, movs:movs};
+  document.getElementById('edit-folio').value = folio;
+  document.getElementById('edit-prod').value = movs.map(function(x){return PRODS[x.prod]||x.prod;}).join(', ');
+  document.getElementById('edit-cant').value = m.cant||'';
+  document.getElementById('edit-pres').value = m.pres||'';
+  document.getElementById('edit-kg').value = movs.reduce(function(s,x){return s+(x.kg||0);},0);
+  document.getElementById('edit-notas').value = '';
+  document.getElementById('edit-warn').style.display='block';
+  var modal=document.getElementById('modal-edit');
+  modal.style.display='flex';
+}
+
+function saveEdit(){
+  if(!editMovData)return;
+  var newCant = parseFloat(document.getElementById('edit-cant').value)||0;
+  var newKg = parseFloat(document.getElementById('edit-kg').value)||0;
+  var notas = document.getElementById('edit-notas').value.trim();
+  var movs = editMovData.movs;
+  var m = movs[0];
+  var bod = m.bodega==='ZIMIX 3'?'z3':m.bodega==='ZIMIX 4'?'z4':null;
+  var prod = m.prod;
+  var oldKg = movs.reduce(function(s,x){return s+(x.kg||0);},0);
+  var diffKg = newKg - oldKg;
+  // Update inventory in memory
+  if(bod && prod && INV[bod][prod]){
+    if(m.tipo==='sal'){
+      // Salida: si reducimos la cantidad, devolvemos kg al inventario
+      INV[bod][prod].kg_total = Math.max(0, INV[bod][prod].kg_total - diffKg);
+    } else if(m.tipo==='ent'){
+      INV[bod][prod].kg_total = Math.max(0, INV[bod][prod].kg_total + diffKg);
+    }
+  }
+  // Update MOVS in memory
+  movs.forEach(function(mv){
+    mv.cant = newCant;
+    mv.kg = newKg / movs.length;
+    if(notas) mv.notas = (mv.notas?mv.notas+' | ':'')+notas;
+  });
+  document.getElementById('modal-edit').style.display='none';
+  editMovData = null;
+  renderInv();
+  shT('Corrección aplicada en memoria — edita Sheets para persistir','o');
+  renderMovs(MOVS);
+}
+
 function goBack(){
   if(fromUrl)return;
   ia=false;cc=null;
@@ -924,6 +977,12 @@ document.addEventListener('DOMContentLoaded',function(){
     var t=e.target;
     if(t.classList&&t.classList.contains('linea-pres'))calcLinea(t.dataset.prefix,t.dataset.idx);
   });
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    if(t.classList&&t.classList.contains('edit-mov-btn'))openEditModal(t.dataset.folio);
+  });
+  document.getElementById('modal-close').addEventListener('click',function(){document.getElementById('modal-edit').style.display='none';});
+  document.getElementById('btn-edit-save').addEventListener('click',saveEdit);
   if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(function(){});}
   var p=new URLSearchParams(window.location.search);
   var u=p.get('u');
