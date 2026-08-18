@@ -591,20 +591,37 @@ function chkPwd(){
   } else document.getElementById('perr').style.display='block';
 }
 
+// Arenas que van en supersaco en ZIMIX 4
+var Z4_SS_PRODS = ['grava-1/4','grava-1/2','grava-1','grava-1-2','8-16','mezcla-ternium'];
+
+function getKgAndLabel(bodKey, p){
+  var d = INV[bodKey][p]||{ss:0,c50:0,kg_total:0};
+  var kg = d.kg_total||0;
+  var isZ3 = bodKey==='z3';
+  var isZ4SS = Z4_SS_PRODS.indexOf(p)>-1;
+  var usesSS = isZ3 || isZ4SS;
+  // Recalculate kg from units to ensure consistency
+  var ss = d.ss||0, c50 = d.c50||0;
+  var kgFromUnits = usesSS ? ss*2000 : c50*50;
+  // Use kg_total as source of truth, derive units
+  var ssCount = usesSS ? Math.round(kg/2000) : 0;
+  var c50Count = !usesSS ? Math.round(kg/50) : 0;
+  var sub = '';
+  if(usesSS && ssCount>0) sub = ssCount+' supersacos';
+  else if(!usesSS && c50Count>0) sub = c50Count+' costales 50 kg';
+  return {kg:kg, sub:sub, ssCount:ssCount, c50Count:c50Count, usesSS:usesSS};
+}
+
 function renderInv(){
-  function fmtRow(lbl,pz,kg){
-    var cls=pz<=0?'color:var(--fa)':'';
-    return '<div style="display:flex;justify-content:space-between;padding:3px 0 3px 12px;font-size:12px;'+cls+'"><span>'+lbl+'</span><span>'+Math.round(pz<=0?0:pz)+' pzas · '+(kg<=0?0:kg).toLocaleString()+' kg</span></div>';
-  }
   function bldTable(bodKey){
     var html='',total=0;
     Object.keys(PRODS).forEach(function(p){
-      var d=INV[bodKey][p]||{ss:0,c50:0,kg_total:0};
-      var kg=d.kg_total||0;total+=kg;
+      var info = getKgAndLabel(bodKey,p);
+      var kg=info.kg; total+=kg;
       var zero=kg<=0;
       html+='<div class="inv-row">'+
         '<div><div class="inv-name'+(zero?' inv-zero':'')+'">'+PRODS[p]+(zero?'<span class="zero-badge">Sin stock</span>':'')+'</div>'+
-        '<div class="inv-sub">'+(d.ss>0?Math.round(d.ss)+' supersacos ':'')+( d.c50>0?Math.round(d.c50)+' costales':'')+'</div></div>'+
+        '<div class="inv-sub">'+info.sub+'</div></div>'+
         '<div class="inv-qty"><div class="main'+(zero?' inv-zero':'')+'">'+kg.toLocaleString()+' kg</div><div class="sub">'+(kg/1000).toFixed(2)+' ton</div></div></div>';
     });
     html+='<div class="inv-row" style="border-top:1.5px solid var(--verde3);"><div><div class="inv-name" style="color:var(--verde);">Total bodega</div></div><div class="inv-qty"><div class="main" style="color:var(--verde);">'+total.toLocaleString()+' kg</div><div class="sub">'+(total/1000).toFixed(1)+' ton</div></div></div>';
@@ -613,11 +630,13 @@ function renderInv(){
   function bldTotal(){
     var html='',total=0;
     Object.keys(PRODS).forEach(function(p){
-      var d3=INV.z3[p]||{ss:0,c50:0,kg_total:0};var d4=INV.z4[p]||{ss:0,c50:0,kg_total:0};
-      var kg=(d3.kg_total||0)+(d4.kg_total||0);total+=kg;var zero=kg<=0;
+      var i3=getKgAndLabel('z3',p),i4=getKgAndLabel('z4',p);
+      var kg=i3.kg+i4.kg;total+=kg;var zero=kg<=0;
+      var sub3=i3.kg>0?'Z3: '+i3.sub||((i3.kg/1000).toFixed(1)+'t'):'Z3: —';
+      var sub4=i4.kg>0?'Z4: '+i4.sub||((i4.kg/1000).toFixed(1)+'t'):'Z4: —';
       html+='<div class="inv-row">'+
         '<div><div class="inv-name'+(zero?' inv-zero':'')+'">'+PRODS[p]+(zero?'<span class="zero-badge">Sin stock</span>':'')+'</div>'+
-        '<div class="inv-sub">Z3: '+(d3.kg_total/1000).toFixed(1)+'t &nbsp; Z4: '+(d4.kg_total/1000).toFixed(1)+'t</div></div>'+
+        '<div class="inv-sub">'+sub3+' &nbsp; '+sub4+'</div></div>'+
         '<div class="inv-qty"><div class="main'+(zero?' inv-zero':'')+'">'+kg.toLocaleString()+' kg</div><div class="sub">'+(kg/1000).toFixed(2)+' ton</div></div></div>';
     });
     html+='<div class="inv-row" style="border-top:1.5px solid var(--verde3);"><div><div class="inv-name" style="color:var(--verde);">Total general</div></div><div class="inv-qty"><div class="main" style="color:var(--verde);">'+total.toLocaleString()+' kg</div><div class="sub">'+(total/1000).toFixed(1)+' ton</div></div></div>';
@@ -641,7 +660,8 @@ function renderDashboard(){
   var html=Object.keys(PRODS).map(function(p){
     var d3=INV.z3[p]||{ss:0,c50:0,kg_total:0};var d4=INV.z4[p]||{ss:0,c50:0,kg_total:0};
     var kgTot=(d3.kg_total||0)+(d4.kg_total||0);var ton=kgTot/1000;
-    var ssTot=(d3.ss||0)+(d4.ss||0);var c50Tot=(d3.c50||0)+(d4.c50||0);
+    var i3=getKgAndLabel('z3',p),i4=getKgAndLabel('z4',p);
+    var ssTot=(i3.ssCount||0)+(i4.ssCount||0);var c50Tot=(i3.c50Count||0)+(i4.c50Count||0);
     var rec=STOCK_REC[p];
     // Semáforo supersacos
     var semColor,semLabel;
@@ -651,8 +671,8 @@ function renderDashboard(){
     else{semColor='#e74c3c';semLabel='Crítico';}
     var barW=rec?Math.min(100,Math.round((ton/(rec.max_t||1))*100)):0;
     var detalle='';
-    if(ssTot>0)detalle+=Math.round(ssTot)+' ss';
-    if(c50Tot>0)detalle+=(detalle?' · ':'')+Math.round(c50Tot)+' cost.';
+    if(ssTot>0)detalle+=Math.round(ssTot)+' ss (2t c/u)';
+    if(c50Tot>0)detalle+=(detalle?' · ':'')+Math.round(c50Tot)+' costales 50kg';
     if(!detalle)detalle='Sin stock';
     // Barra de costales (solo arenas que aplican)
     var costalBar='';
