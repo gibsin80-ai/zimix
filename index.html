@@ -863,20 +863,32 @@ function generarPDF(){
   var fecha=new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
   var hora=new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
   var totalGen=0,rows='';
+  var Z4SS=['grava-1/4','grava-1/2','grava-1','grava-1-2','8-16','mezcla-ternium'];
+  function pdfPzas(kg,isZ3,prodKey){
+    if(kg<=0)return '—';
+    var useSS=isZ3||(Z4SS.indexOf(prodKey)>-1);
+    return useSS?Math.round(kg/2000)+' ss':Math.round(kg/50)+' cost.';
+  }
   Object.keys(PRODS).forEach(function(p){
     var d3=INV.z3[p]||{ss:0,c50:0,kg_total:0},d4=INV.z4[p]||{ss:0,c50:0,kg_total:0};
-    var kg3=d3.kg_total||0,kg4=d4.kg_total||0,kgTot=kg3+kg4;totalGen+=kgTot;
+    var kg3=d3.kg_total||0,kg4=d4.kg_total||0,kgTot=kg3+kg4;
+    var isCaucho=p==='caucho';
+    if(!isCaucho)totalGen+=kgTot;
     var sinStock=kgTot<=0;
-    function fmtBod(d,kg){if(kg<=0)return '<span style="color:#bbb;">—</span>';var p=[];if(d.ss>0)p.push(Math.round(d.ss)+' ss');if(d.c50>0)p.push(Math.round(d.c50)+' cost.');return p.length?p.join(' + '):(kg.toLocaleString()+' kg');}
-    rows+='<tr style="'+(sinStock?'background:#fff5f5;color:#bbb;':'')+'border-bottom:1px solid #eee;">'+
-      '<td style="padding:7px 10px;font-weight:600;">'+PRODS[p]+'</td>'+
-      '<td style="padding:7px 10px;text-align:center;">'+fmtBod(d3,kg3)+'</td>'+
-      '<td style="padding:7px 10px;text-align:center;">'+fmtBod(d4,kg4)+'</td>'+
-      '<td style="padding:7px 10px;text-align:right;font-weight:700;color:'+(sinStock?'#ccc':'#0a3424')+';">'+(sinStock?'0':kgTot.toLocaleString())+' kg</td>'+
+    var pz3=pdfPzas(kg3,true,p),pz4=pdfPzas(kg4,false,p);
+    var tipoZ3=kg3>0?'ss 2t':'';
+    var tipoZ4=kg4>0?(Z4SS.indexOf(p)>-1?'ss 2t':'cost. 50kg'):'';
+    rows+='<tr style="'+(sinStock?'background:#fff5f5;color:#bbb;':'')+(isCaucho?'background:#fdf8ee;':'')+' border-bottom:1px solid #eee;">'+
+      '<td style="padding:7px 10px;font-weight:600;">'+PRODS[p]+(isCaucho?' <span style="font-size:10px;color:#888;font-weight:400;">(separado)</span>':'')+'</td>'+
+      '<td style="padding:7px 10px;text-align:center;font-size:12px;">'+(kg3>0?kg3.toLocaleString()+' kg':'—')+'</td>'+
+      '<td style="padding:7px 10px;text-align:center;font-size:11px;color:#555;font-weight:600;">'+(kg3>0?pz3+' ('+tipoZ3+')':'—')+'</td>'+
+      '<td style="padding:7px 10px;text-align:center;font-size:12px;">'+(kg4>0?kg4.toLocaleString()+' kg':'—')+'</td>'+
+      '<td style="padding:7px 10px;text-align:center;font-size:11px;color:#555;font-weight:600;">'+(kg4>0?pz4+' ('+tipoZ4+')':'—')+'</td>'+
+      '<td style="padding:7px 10px;text-align:right;font-weight:700;color:'+(sinStock?'#ccc':isCaucho?'#888':'#0a3424')+';">'+(sinStock?'0':kgTot.toLocaleString())+' kg</td>'+
       '<td style="padding:7px 10px;text-align:right;">'+(kgTot/1000).toFixed(2)+' ton</td>'+
-      '<td style="padding:7px 10px;text-align:center;">'+(sinStock?'<span style="background:#fee;color:#c0392b;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;">Sin stock</span>':'<span style="background:#eaf7ef;color:#0a7a3a;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;">OK</span>')+'</td></tr>';
+      '<td style="padding:7px 10px;text-align:center;">'+(sinStock?'<span style="background:#fee;color:#c0392b;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;">Sin stock</span>':isCaucho?'<span style="background:#f5f0e0;color:#888;padding:2px 7px;border-radius:999px;font-size:11px;">Caucho</span>':'<span style="background:#eaf7ef;color:#0a7a3a;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:600;">OK</span>')+'</td></tr>';
   });
-  rows+='<tr style="background:#0a3424;color:white;font-weight:700;"><td style="padding:9px 10px;" colspan="3">TOTAL GENERAL</td><td style="padding:9px 10px;text-align:right;">'+totalGen.toLocaleString()+' kg</td><td style="padding:9px 10px;text-align:right;">'+(totalGen/1000).toFixed(2)+' ton</td><td></td></tr>';
+  rows+='<tr style="background:#0a3424;color:white;font-weight:700;"><td style="padding:9px 10px;" colspan="5">TOTAL ARENAS</td><td style="padding:9px 10px;text-align:right;">'+totalGen.toLocaleString()+' kg</td><td style="padding:9px 10px;text-align:right;">'+(totalGen/1000).toFixed(2)+' ton</td><td></td></tr>';
   var html='<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>Reporte ZIMIX '+fecha+'</title>'+
     '<style>body{font-family:system-ui,sans-serif;margin:0;padding:24px;font-size:13px;}table{width:100%;border-collapse:collapse;}thead tr{background:#0a3424;color:white;}th{padding:9px 10px;text-align:left;font-weight:600;}th:not(:first-child){text-align:center;}@media print{button{display:none!important;}}</style></head><body>'+
     '<table style="margin-bottom:20px;border:none;"><tr><td style="width:52px;padding:0;border:none;"><div style="background:#0a3424;color:white;font-weight:800;font-size:24px;width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;">Z</div></td>'+
