@@ -626,26 +626,35 @@ function getKgAndLabel(bodKey, p){
 
 function renderInv(){
   function bldTable(bodKey){
-    var html='',total=0;
+    var html='',total=0,caucho_kg=0;
     Object.keys(PRODS).forEach(function(p){
       var info = getKgAndLabel(bodKey,p);
-      var kg=info.kg; total+=kg;
+      var kg=info.kg;
       var zero=kg<=0;
+      if(p==='caucho'){caucho_kg=kg;}else{total+=kg;}
       html+='<div class="inv-row">'+
         '<div><div class="inv-name'+(zero?' inv-zero':'')+'">'+PRODS[p]+(zero?'<span class="zero-badge">Sin stock</span>':'')+'</div>'+
         '<div class="inv-sub">'+info.sub+'</div></div>'+
         '<div class="inv-qty"><div class="main'+(zero?' inv-zero':'')+'">'+kg.toLocaleString()+' kg</div><div class="sub">'+(kg/1000).toFixed(2)+' ton</div></div></div>';
     });
-    html+='<div class="inv-row" style="border-top:1.5px solid var(--verde3);"><div><div class="inv-name" style="color:var(--verde);">Total bodega</div></div><div class="inv-qty"><div class="main" style="color:var(--verde);">'+total.toLocaleString()+' kg</div><div class="sub">'+(total/1000).toFixed(1)+' ton</div></div></div>';
+    html+='<div class="inv-row" style="border-top:1.5px solid var(--verde3);">'+
+      '<div><div class="inv-name" style="color:var(--verde);">Total arenas</div></div>'+
+      '<div class="inv-qty"><div class="main" style="color:var(--verde);">'+total.toLocaleString()+' kg</div><div class="sub">'+(total/1000).toFixed(1)+' ton</div></div></div>';
+    if(caucho_kg>0){
+      html+='<div class="inv-row" style="border-top:.5px solid var(--bd);">'+
+        '<div><div class="inv-name" style="color:var(--mu);font-size:12px;">Caucho (no suma a arenas)</div></div>'+
+        '<div class="inv-qty"><div class="main" style="color:var(--mu);">'+caucho_kg.toLocaleString()+' kg</div><div class="sub">'+(caucho_kg/1000).toFixed(2)+' ton</div></div></div>';
+    }
     return '<div class="card">'+html+'</div>';
   }
   function bldTotal(){
-    var html='',total=0;
+    var html='',total=0,caucho_kg=0;
     Object.keys(PRODS).forEach(function(p){
       var i3=getKgAndLabel('z3',p),i4=getKgAndLabel('z4',p);
-      var kg=i3.kg+i4.kg;total+=kg;var zero=kg<=0;
-      var sub3=i3.kg>0?'Z3: '+i3.sub||((i3.kg/1000).toFixed(1)+'t'):'Z3: —';
-      var sub4=i4.kg>0?'Z4: '+i4.sub||((i4.kg/1000).toFixed(1)+'t'):'Z4: —';
+      var kg=i3.kg+i4.kg;var zero=kg<=0;
+      if(p==='caucho'){caucho_kg=kg;}else{total+=kg;}
+      var sub3=i3.kg>0?'Z3: '+(i3.sub||(i3.kg/1000).toFixed(1)+'t'):'Z3: —';
+      var sub4=i4.kg>0?'Z4: '+(i4.sub||(i4.kg/1000).toFixed(1)+'t'):'Z4: —';
       html+='<div class="inv-row">'+
         '<div><div class="inv-name'+(zero?' inv-zero':'')+'">'+PRODS[p]+(zero?'<span class="zero-badge">Sin stock</span>':'')+'</div>'+
         '<div class="inv-sub">'+sub3+' &nbsp; '+sub4+'</div></div>'+
