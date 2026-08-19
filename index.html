@@ -807,6 +807,14 @@ async function loadFromSheets(){
     if(!rows||!rows.length)return;
     MOVS=[];
     Object.keys(PRODS).forEach(function(p){INV.z3[p]={ss:0,c50:0,kg_total:0};INV.z4[p]={ss:0,c50:0,kg_total:0};});
+    // Re-apply initial physical stock before adding movements
+    INV.z3['20-40'].kg_total=71*2000;INV.z3['40-60'].kg_total=40*2000;
+    INV.z3['80-90'].kg_total=88*2000;INV.z3['70-80'].kg_total=16*2000;
+    INV.z3['16-30c'].kg_total=20*2000;INV.z3['grava-1/4'].kg_total=15*2000;
+    INV.z3['4-8'].kg_total=7*2000;
+    INV.z4['8-16'].kg_total=24*2000;INV.z4['mezcla-ternium'].kg_total=20*2000;
+    INV.z4['16-30c'].kg_total=345*50;INV.z4['40-60'].kg_total=979*50;
+    INV.z4['70-80'].kg_total=979*50;INV.z4['20-40'].kg_total=694*50;
     var prodRevMap={};Object.keys(PRODS).forEach(function(k){prodRevMap[PRODS[k]]=k;});
     // Unify 90-100 into 80-90
     prodRevMap['Arena 90-100 (Fina)']='80-90';
