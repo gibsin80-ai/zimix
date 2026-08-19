@@ -831,11 +831,10 @@ async function loadFromSheets(){
       MOVS.push({tipo:tipo,folio:r['Folio'],prod:prodKey,cant:cant,pres:pres,kg:kg,
         bodega:r['Bodega'],de:r['De'],a:r['A'],cliente:r['Cliente'],
         placas:r['Placas'],notas:r['Notas'],fecha:String(r['Fecha']).split('T')[0]||r['Fecha']});
-      if(tipo==='ent'&&bod){
+      if(tipo==='ent'&&bod&&prodKey){
         if(!INV[bod][prodKey])INV[bod][prodKey]={ss:0,c50:0,kg_total:0};
-        // Always use kg field as source of truth
         INV[bod][prodKey].kg_total+=kg;
-      } else if(tipo==='sal'&&bod){
+      } else if(tipo==='sal'&&bod&&prodKey){
         if(!INV[bod][prodKey])INV[bod][prodKey]={ss:0,c50:0,kg_total:0};
         INV[bod][prodKey].kg_total=Math.max(0,INV[bod][prodKey].kg_total-kg);
       } else if(tipo==='trf'&&de&&a){
