@@ -226,38 +226,80 @@ body{font-family:var(--fn);background:var(--arena);min-height:100vh;color:var(--
 
       <!-- CONVERSION -->
       <div id="form-conv" style="display:none;">
-        <div class="folio-box" style="background:linear-gradient(135deg,#5a3a00 0%,#9a6800 100%);">
-          <div class="folio-label">Conversion de presentacion</div>
-          <div class="folio-num" id="folio-conv">CONV-001</div>
-          <div class="folio-sub" id="fecha-conv"></div>
+        <div class="itabs" style="margin-bottom:1rem;">
+          <button class="itab active" id="ct-normal">Supersaco → Costales</button>
+          <button class="itab" id="ct-ternium">Mezcla Ternium</button>
         </div>
-        <div class="card">
-          <div class="ctit">De → A</div>
-          <div class="fld"><label>Bodega</label><select id="conv-bod"><option value="z3">ZIMIX 3</option><option value="z4">ZIMIX 4</option></select></div>
-          <div class="fld"><label>Producto</label><select id="conv-prod"><option value="">Seleccionar...</option></select></div>
-          <div style="background:var(--arena);border-radius:var(--rs);padding:12px;margin-bottom:12px;">
-            <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;margin-bottom:10px;">Entrada (supersacos a abrir)</div>
-            <div class="fr">
-              <div class="fld"><label>Cantidad</label><input type="number" id="conv-de-cant" placeholder="0"/></div>
-              <div class="fld"><label>De</label>
-                <select id="conv-de-pres">
-                  <option value="ss1000">Supersaco 1,000 kg</option>
-                  <option value="ss1500">Supersaco 1,500 kg</option>
-                  <option value="ss2000">Supersaco 2,000 kg</option>
-                </select>
+
+        <!-- CONVERSION NORMAL -->
+        <div id="conv-normal">
+          <div class="folio-box" style="background:linear-gradient(135deg,#5a3a00 0%,#9a6800 100%);">
+            <div class="folio-label">Conversion de presentacion</div>
+            <div class="folio-num" id="folio-conv">CONV-001</div>
+            <div class="folio-sub" id="fecha-conv"></div>
+          </div>
+          <div class="card">
+            <div class="ctit">De → A</div>
+            <div class="fld"><label>Bodega</label><select id="conv-bod"><option value="z3">ZIMIX 3</option><option value="z4">ZIMIX 4</option></select></div>
+            <div class="fld"><label>Producto</label><select id="conv-prod"><option value="">Seleccionar...</option></select></div>
+            <div style="background:var(--arena);border-radius:var(--rs);padding:12px;margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;margin-bottom:10px;">Entrada (supersacos a abrir)</div>
+              <div class="fr">
+                <div class="fld"><label>Cantidad</label><input type="number" id="conv-de-cant" placeholder="0"/></div>
+                <div class="fld"><label>De</label>
+                  <select id="conv-de-pres">
+                    <option value="ss1000">Supersaco 1,000 kg</option>
+                    <option value="ss1500">Supersaco 1,500 kg</option>
+                    <option value="ss2000">Supersaco 2,000 kg</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
-          <div style="background:var(--sbg);border-radius:var(--rs);padding:12px;margin-bottom:12px;">
-            <div style="font-size:11px;font-weight:700;color:var(--stx);text-transform:uppercase;margin-bottom:10px;">Salida (costales producidos)</div>
-            <div class="fr">
-              <div class="fld"><label>Costales 50 kg</label><input type="number" id="conv-a-cant" readonly style="background:var(--arena);"/></div>
-              <div class="fld"><label>Kg totales</label><input type="number" id="conv-kg" readonly style="background:var(--arena);"/></div>
+            <div style="background:var(--sbg);border-radius:var(--rs);padding:12px;margin-bottom:12px;">
+              <div style="font-size:11px;font-weight:700;color:var(--stx);text-transform:uppercase;margin-bottom:10px;">Salida (costales producidos)</div>
+              <div class="fr">
+                <div class="fld"><label>Costales 50 kg</label><input type="number" id="conv-a-cant" readonly style="background:var(--arena);"/></div>
+                <div class="fld"><label>Kg totales</label><input type="number" id="conv-kg" readonly style="background:var(--arena);"/></div>
+              </div>
             </div>
+            <div class="fld"><label>Comentarios</label><textarea id="conv-notas" placeholder="Observaciones..."></textarea></div>
           </div>
-          <div class="fld"><label>Comentarios</label><textarea id="conv-notas" placeholder="Observaciones..."></textarea></div>
+          <button class="sbmt" id="btn-conv" style="background:var(--wtx);"><i class="ti ti-refresh"></i> Registrar conversion</button>
         </div>
-        <button class="sbmt" id="btn-conv" style="background:var(--wtx);"><i class="ti ti-refresh"></i> Registrar conversion</button>
+
+        <!-- MEZCLA TERNIUM -->
+        <div id="conv-ternium" style="display:none;">
+          <div class="folio-box" style="background:linear-gradient(135deg,#1a3a6b 0%,#2d6bcf 100%);">
+            <div class="folio-label">Produccion Mezcla Ternium</div>
+            <div class="folio-num" id="folio-tern">TERN-001</div>
+            <div class="folio-sub" id="fecha-tern"></div>
+          </div>
+          <div class="card">
+            <div class="ctit">Supersacos a producir</div>
+            <div class="fld"><label>Bodega origen (ZIMIX 3)</label>
+              <input type="text" value="ZIMIX 3" readonly style="background:var(--arena);color:var(--mu);"/>
+            </div>
+            <div class="fld"><label>Cantidad de supersacos a producir</label>
+              <input type="number" id="tern-cant" placeholder="Ej. 10" oninput="calcTernium()"/>
+            </div>
+            <div id="tern-preview" style="display:none;margin-top:8px;">
+              <div style="background:var(--arena);border-radius:var(--rs);padding:12px;margin-bottom:8px;">
+                <div style="font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;margin-bottom:10px;">Se descontará de ZIMIX 3</div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span>Arena 8-16 (60%)</span><span id="tern-816" style="font-weight:700;"></span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span>Arena 20-40 (30%)</span><span id="tern-2040" style="font-weight:700;"></span></div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;"><span>Arena 4-8 (10%)</span><span id="tern-48" style="font-weight:700;"></span></div>
+                <div style="border-top:.5px solid var(--bd);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between;font-size:13px;font-weight:700;"><span>Total</span><span id="tern-total"></span></div>
+              </div>
+              <div style="background:var(--sbg);border-radius:var(--rs);padding:12px;">
+                <div style="font-size:11px;font-weight:700;color:var(--stx);text-transform:uppercase;margin-bottom:6px;">Se agregará a inventario</div>
+                <div style="font-size:13px;font-weight:700;color:var(--stx);" id="tern-resultado"></div>
+              </div>
+            </div>
+            <div id="tern-warn" class="ntag warn" style="margin-top:8px;display:none;"></div>
+            <div class="fld" style="margin-top:12px;"><label>Comentarios</label><textarea id="tern-notas" placeholder="Observaciones..."></textarea></div>
+          </div>
+          <button class="sbmt" id="btn-ternium" style="background:#1a3a6b;margin-top:4px;"><i class="ti ti-flask"></i> Registrar producción Mezcla Ternium</button>
+        </div>
       </div>
     </div>
 
@@ -341,7 +383,7 @@ var STOCK_REC={
 
 var cc=null,ia=false,fromUrl=false;
 var MOVS=[];
-var COUNTERS={ent:1,sal:11788,trf:1,conv:1};
+var COUNTERS={ent:1,sal:11788,trf:1,conv:1,tern:1};
 var INV={z3:{},z4:{}};
 Object.keys(PRODS).forEach(function(p){INV.z3[p]={ss:0,c50:0,kg_total:0};INV.z4[p]={ss:0,c50:0,kg_total:0};});
 // Inventario fisico inicial
@@ -1012,6 +1054,68 @@ function saveEdit(){
   renderMovs(MOVS);
 }
 
+function calcTernium(){
+  var cant=parseFloat(document.getElementById('tern-cant').value)||0;
+  var prev=document.getElementById('tern-preview');
+  var warn=document.getElementById('tern-warn');
+  if(cant<=0){prev.style.display='none';warn.style.display='none';return;}
+  var kg816=cant*1200,kg2040=cant*600,kg48=cant*200,kgTotal=cant*2000;
+  document.getElementById('tern-816').textContent=kg816.toLocaleString()+' kg ('+Math.ceil(kg816/2000)+' ss)';
+  document.getElementById('tern-2040').textContent=kg2040.toLocaleString()+' kg ('+Math.ceil(kg2040/2000)+' ss)';
+  document.getElementById('tern-48').textContent=kg48.toLocaleString()+' kg ('+Math.ceil(kg48/2000)+' ss)';
+  document.getElementById('tern-total').textContent=kgTotal.toLocaleString()+' kg';
+  document.getElementById('tern-resultado').textContent=cant+' supersacos de Mezcla Ternium ('+kgTotal.toLocaleString()+' kg = '+(kgTotal/1000).toFixed(1)+' ton)';
+  prev.style.display='block';
+  // Check stock
+  var disp816=(INV.z3['8-16']?INV.z3['8-16'].kg_total:0)||0;
+  var disp2040=(INV.z3['20-40']?INV.z3['20-40'].kg_total:0)||0;
+  var disp48=(INV.z3['4-8']?INV.z3['4-8'].kg_total:0)||0;
+  var msgs=[];
+  if(kg816>disp816)msgs.push('8-16: necesitas '+kg816.toLocaleString()+' kg, hay '+disp816.toLocaleString()+' kg');
+  if(kg2040>disp2040)msgs.push('20-40: necesitas '+kg2040.toLocaleString()+' kg, hay '+disp2040.toLocaleString()+' kg');
+  if(kg48>disp48)msgs.push('4-8: necesitas '+kg48.toLocaleString()+' kg, hay '+disp48.toLocaleString()+' kg');
+  if(msgs.length){warn.innerHTML='Saldo insuficiente:<br>'+msgs.join('<br>');warn.style.display='block';}
+  else warn.style.display='none';
+}
+
+function regTernium(){
+  var cant=parseFloat(document.getElementById('tern-cant').value)||0;
+  var notas=document.getElementById('tern-notas').value.trim();
+  if(!cant){shT('Ingresa la cantidad de supersacos','e');return;}
+  var kg816=cant*1200,kg2040=cant*600,kg48=cant*200,kgTotal=cant*2000;
+  // Check stock
+  var disp816=(INV.z3['8-16']?INV.z3['8-16'].kg_total:0)||0;
+  var disp2040=(INV.z3['20-40']?INV.z3['20-40'].kg_total:0)||0;
+  var disp48=(INV.z3['4-8']?INV.z3['4-8'].kg_total:0)||0;
+  if(kg816>disp816||kg2040>disp2040||kg48>disp48){shT('Saldo insuficiente para la mezcla','e');return;}
+  var folio='TERN-'+String(COUNTERS.tern).padStart(3,'0');
+  var today=todayStr();
+  // Descontar de inventario ZIMIX 3
+  INV.z3['8-16'].kg_total-=kg816;
+  INV.z3['20-40'].kg_total-=kg2040;
+  INV.z3['4-8'].kg_total-=kg48;
+  // Agregar Mezcla Ternium a ZIMIX 3
+  if(!INV.z3['mezcla-ternium'])INV.z3['mezcla-ternium']={ss:0,c50:0,kg_total:0};
+  INV.z3['mezcla-ternium'].kg_total+=kgTotal;
+  // Registrar movimientos en Sheets
+  var fecha=new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'2-digit',year:'numeric'});
+  [{prod:'8-16',kg:kg816,lbl:'Arena 8-16'},{prod:'20-40',kg:kg2040,lbl:'Arena 20-40/16-30 beige'},{prod:'4-8',kg:kg48,lbl:'Arena 4-8'}].forEach(function(x){
+    var mov={tipo:'sal',folio:folio,prod:x.prod,cant:Math.ceil(x.kg/2000),pres:'Supersaco 2,000 kg',kg:x.kg,cliente:'Mezcla Ternium',bodega:'ZIMIX 3',notas:'Produccion Mezcla Ternium '+folio+(notas?' - '+notas:''),fecha:fecha};
+    MOVS.unshift(mov);saveToSheets(mov);
+  });
+  var movEnt={tipo:'ent',folio:folio,prod:'mezcla-ternium',cant:cant,pres:'Supersaco 2,000 kg',kg:kgTotal,origen:'Produccion interna',bodega:'ZIMIX 3',notas:'Mezcla Ternium: '+cant+' ss (8-16/20-40/4-8)'+(notas?' - '+notas:''),fecha:fecha};
+  MOVS.unshift(movEnt);saveToSheets(movEnt);
+  COUNTERS.tern++;
+  document.getElementById('tern-cant').value='';
+  document.getElementById('tern-preview').style.display='none';
+  document.getElementById('tern-warn').style.display='none';
+  document.getElementById('tern-notas').value='';
+  document.getElementById('folio-tern').textContent='TERN-'+String(COUNTERS.tern).padStart(3,'0');
+  renderInv();
+  shT(folio+' registrado: '+cant+' ss Mezcla Ternium','o');
+  shSc('inv');document.querySelectorAll('.nbtn').forEach(function(b){b.classList.remove('active');});document.getElementById('tab-inv').classList.add('active');
+}
+
 function goBack(){
   if(fromUrl)return;
   ia=false;cc=null;
@@ -1044,6 +1148,19 @@ document.addEventListener('DOMContentLoaded',function(){
   document.getElementById('mt-sal').addEventListener('click',function(){shMovForm('sal');});
   document.getElementById('mt-trf').addEventListener('click',function(){shMovForm('trf');});
   document.getElementById('mt-conv').addEventListener('click',function(){shMovForm('conv');});
+  document.getElementById('ct-normal').addEventListener('click',function(){
+    document.getElementById('conv-normal').style.display='block';
+    document.getElementById('conv-ternium').style.display='none';
+    document.querySelectorAll('#form-conv .itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');
+  });
+  document.getElementById('ct-ternium').addEventListener('click',function(){
+    document.getElementById('conv-normal').style.display='none';
+    document.getElementById('conv-ternium').style.display='block';
+    document.querySelectorAll('#form-conv .itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');
+    document.getElementById('fecha-tern').textContent=new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+    document.getElementById('folio-tern').textContent='TERN-'+String(COUNTERS.tern).padStart(3,'0');
+  });
+  document.getElementById('btn-ternium').addEventListener('click',regTernium);
   document.getElementById('it-z3').addEventListener('click',function(){shInvTab('z3');document.querySelectorAll('.itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
   document.getElementById('it-z4').addEventListener('click',function(){shInvTab('z4');document.querySelectorAll('.itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
   document.getElementById('it-tot').addEventListener('click',function(){shInvTab('tot');document.querySelectorAll('.itab').forEach(function(b){b.classList.remove('active');});this.classList.add('active');});
